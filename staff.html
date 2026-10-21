@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>운영요원 — 입장번호</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;700&display=swap">
+<style>
+body{margin:0; background:#1C2A3A; color:#fff; font-family:"Noto Sans KR",sans-serif; display:grid; place-items:center; min-height:100vh; text-align:center}
+.box{padding:24px}
+h1{font-family:"Jua",sans-serif; font-weight:400; font-size:22px; color:#FFD66B; margin:0 0 6px}
+.code{font-family:"Jua",sans-serif; font-size:min(34vw,180px); letter-spacing:.12em; line-height:1; color:#fff; text-shadow:0 4px 24px rgba(0,0,0,.5)}
+.sub{font-size:16px; color:#C9D3E2; margin-top:10px}
+.next{margin-top:22px; font-size:15px; color:#A9B3C1}
+.next b{font-family:"Jua",sans-serif; font-size:28px; color:#FFE9A8; letter-spacing:.1em}
+.lock{margin-top:30px; font-size:13px; color:#7F8CA0}
+input{font-size:20px; padding:10px 14px; border-radius:10px; border:0; text-align:center; letter-spacing:.3em}
+</style></head><body>
+<div class="box" id="gate">
+  <h1>운영요원 전용</h1>
+  <p class="sub">PIN을 입력하세요</p>
+  <input id="pin" inputmode="numeric" maxlength="4" autofocus><br><br>
+  <button onclick="unlock()" style="font-size:18px; padding:10px 24px; border-radius:10px; border:0; background:#FFC63D">열기</button>
+</div>
+<div class="box" id="main" style="display:none">
+  <h1>지금 입장번호</h1>
+  <div class="code" id="cur">----</div>
+  <p class="sub">참여권을 받은 분께 이 네 자리를 알려주세요 · <span id="left"></span> 후 바뀜</p>
+  <p class="next">다음 번호 <b id="nxt">----</b> · 직전 번호 <b id="prv">----</b> (둘 다 당분간 유효)</p>
+  <p class="lock">경품수령소 수령 처리 PIN은 앱 설정과 동일 · 이 페이지 주소는 외부에 공개하지 마세요</p>
+</div>
+<script>
+const OTP_SECRET="sunshine-2026-1024", SLOT_MIN=30, STAFF_PIN="2410"; // index.html CONFIG와 동일하게
+function fnv(s){ let h=2166136261; for(const c of s){ h^=c.charCodeAt(0); h=Math.imul(h,16777619)>>>0; } return h; }
+function otpFor(slot){ const d=new Date(); const day=d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate(); return String(fnv(OTP_SECRET+"|"+day+"|"+slot)%10000).padStart(4,"0"); }
+function tick(){ const ms=SLOT_MIN*60000; const s=Math.floor(Date.now()/ms); document.getElementById("cur").textContent=otpFor(s); document.getElementById("nxt").textContent=otpFor(s+1); document.getElementById("prv").textContent=otpFor(s-1);
+  const left=Math.ceil(((s+1)*ms-Date.now())/60000); document.getElementById("left").textContent=left+"분"; }
+function unlock(){ if(document.getElementById("pin").value!==STAFF_PIN){ alert("PIN이 맞지 않아요"); return; } document.getElementById("gate").style.display="none"; document.getElementById("main").style.display="block"; tick(); setInterval(tick,15000); }
+document.getElementById("pin").addEventListener("keydown",e=>{ if(e.key==="Enter") unlock(); });
+</script></body></html>
