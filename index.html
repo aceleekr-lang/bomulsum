@@ -30,7 +30,9 @@ h1,h2,h3{font-family:var(--font-display); font-weight:400; line-height:1.25; mar
 h1{font-size:30px} h2{font-size:24px} h3{font-size:19px}
 p{margin:0} img{max-width:100%; display:block} button{font:inherit}
 :focus-visible{outline:3px solid var(--sun); outline-offset:2px}
-.wrap{max-width:560px; margin:0 auto; padding:0 16px 40px}
+.wrap{max-width:560px; margin:0 auto; padding:0 16px 40px; overflow-x:clip}
+html,body{max-width:100%; overflow-x:hidden}
+input,select,textarea{max-width:100%; min-width:0}
 
 .top{position:sticky; top:0; z-index:20; background:color-mix(in srgb,var(--bg) 88%,transparent); backdrop-filter:blur(10px); border-bottom:1px solid var(--line)}
 .top .in{max-width:560px; margin:0 auto; padding:10px 16px; display:flex; align-items:center; justify-content:space-between; gap:10px}
@@ -129,11 +131,59 @@ input[type=file]{display:none}
 .slot span{font-size:11px; position:absolute; bottom:-18px; left:0; right:0; text-align:center; color:var(--muted); font-weight:700}
 .slot.on{border-style:solid; border-color:var(--leaf); background:#E3F6EA; transform:scale(1.06)}
 .slot:not(.on){filter:grayscale(1); opacity:.6}
-.clues{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px}
+.slot img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; border-radius:14px}
+.slot.on::after{content:"✓"; position:absolute; right:-6px; top:-6px; width:22px; height:22px; border-radius:50%; background:var(--leaf); color:#fff; font-size:13px; font-weight:900; display:grid; place-items:center; border:2px solid var(--card)}
+.slots.photo5{gap:28px 14px; margin-bottom:26px}
+.slots.photo5 .slot{width:72px; height:72px}
+/* 설문 */
+.field{display:grid; gap:6px; margin-top:12px}
+.field label{font-weight:700; font-size:15px}
+.field input,.field select,.field textarea{min-height:50px; padding:0 14px; border-radius:12px; border:2px solid var(--line); background:var(--bg); color:var(--fg); font-size:17px; width:100%}
+.field textarea{padding:10px 14px; min-height:80px; resize:vertical}
+.stars{display:flex; gap:6px}
+.stars button{flex:1; min-height:52px; font-size:26px; border-radius:12px; border:2px solid var(--line); background:var(--bg); cursor:pointer; filter:grayscale(1); opacity:.5}
+.stars button.on{filter:none; opacity:1; border-color:var(--sun); background:var(--soft)}
+.chk{display:flex; gap:10px; align-items:flex-start; padding:10px 12px; border-radius:12px; background:var(--soft); font-size:14.5px; margin-top:8px}
+.chk input{width:22px; height:22px; margin-top:2px; flex:0 0 auto; accent-color:var(--sky)}
+.opts{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px}
+.opts button{min-height:46px; border-radius:12px; border:2px solid var(--line); background:var(--bg); color:var(--fg); font-size:15px; cursor:pointer}
+.opts button.on{border-color:var(--sky); background:color-mix(in srgb,var(--sky) 12%,var(--bg)); font-weight:700}
+/* 가챠 */
+.gacha{position:relative; margin-top:14px; border-radius:22px; overflow:hidden; background:linear-gradient(#1b2a4a,#0b1426); color:#fff; padding:18px 16px 20px; text-align:center; box-shadow:var(--shadow)}
+.machine{position:relative; width:200px; height:260px; margin:6px auto 0}
+.machine img.mimg{position:absolute; inset:0; width:100%; height:100%; object-fit:contain; z-index:2; filter:drop-shadow(0 10px 24px rgba(0,0,0,.45))}
+.machine.hasimg{width:250px; height:250px} .machine.hasimg .dome,.machine.hasimg .base,.machine.hasimg .knob,.machine.hasimg .tray{display:none} .machine.hasimg .drop{bottom:-6px; z-index:4}
+.dome{position:absolute; left:10px; right:10px; top:0; height:180px; border-radius:90px 90px 20px 20px; background:radial-gradient(circle at 35% 25%,rgba(255,255,255,.55),rgba(255,255,255,.12) 40%,rgba(255,255,255,.05) 70%); border:4px solid #FFD66B; overflow:hidden}
+.cap{position:absolute; width:38px; height:38px; border-radius:50%; background:linear-gradient(#fff 50%,var(--c) 50%); box-shadow:inset -4px -4px 0 rgba(0,0,0,.12); animation:bounce 1.6s ease-in-out infinite}
+@keyframes bounce{0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)}}
+.shake .cap{animation:rattle .25s linear infinite}
+@keyframes rattle{0%{transform:translate(0,0) rotate(0)} 25%{transform:translate(-6px,-8px) rotate(-12deg)} 50%{transform:translate(5px,-3px) rotate(10deg)} 75%{transform:translate(-3px,-10px) rotate(-5deg)} 100%{transform:translate(0,0)}}
+.shake{animation:mshake .25s linear infinite}
+@keyframes mshake{0%,100%{transform:translateX(0)} 25%{transform:translateX(-4px) rotate(-1deg)} 75%{transform:translateX(4px) rotate(1deg)}}
+.base{position:absolute; left:0; right:0; bottom:0; height:84px; border-radius:16px; background:linear-gradient(#D9453A,#A4291F); border:4px solid #FFD66B}
+.knob{position:absolute; left:50%; bottom:46px; width:40px; height:40px; margin-left:-20px; border-radius:50%; background:#FFD66B; border:4px solid #B9770E; z-index:3}
+.knob::after{content:""; position:absolute; left:50%; top:4px; width:6px; height:26px; margin-left:-3px; background:#B9770E; border-radius:3px}
+.turn .knob{animation:spin 1.2s ease-in-out 1}
+.tray{position:absolute; left:50%; bottom:6px; width:70px; height:28px; margin-left:-35px; border-radius:8px; background:#1C2A3A; z-index:3}
+.drop{position:absolute; left:50%; bottom:8px; width:56px; height:56px; margin-left:-28px; border-radius:50%; background:linear-gradient(#fff 50%,#FFC63D 50%); box-shadow:0 6px 16px rgba(0,0,0,.5); z-index:4; opacity:0}
+.drop.go{animation:fall 1s .9s cubic-bezier(.3,1.4,.6,1) forwards}
+@keyframes fall{0%{opacity:0; transform:translateY(-140px) scale(.6)} 60%{opacity:1; transform:translateY(10px) scale(1)} 80%{transform:translateY(-8px)} 100%{opacity:1; transform:translateY(0)}}
+.drop.pop{animation:burst .6s ease forwards}
+@keyframes burst{to{transform:scale(2.4); opacity:0}}
+.prize{display:none; margin-top:12px; animation:pop .8s ease}
+.prize.show{display:block}
+.prize .pimg{width:150px; height:150px; object-fit:contain; margin:0 auto 6px; filter:drop-shadow(0 8px 20px rgba(0,0,0,.4))}
+.prize .emo{font-size:84px; line-height:1.1}
+.prize h3{font-size:26px; color:#FFE9A8}
+.conf{position:absolute; top:-10px; width:10px; height:14px; border-radius:2px; animation:confetti 2.6s linear infinite; z-index:5}
+@keyframes confetti{to{transform:translateY(420px) rotate(720deg); opacity:0}}
+.ticket .prz{margin-top:10px; padding:8px 12px; border-radius:12px; background:rgba(255,255,255,.55); font-weight:700}
+.clues{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin-top:8px}
+.card>*{min-width:0} .card{min-width:0}
 .clue{border-radius:12px; padding:10px; background:var(--soft); font-size:14px}
 .clue b{display:block; font-family:var(--font-display); font-size:16px; color:var(--coral)}
 .ans{display:flex; gap:8px; margin-top:10px}
-.ans input{flex:1; min-height:52px; padding:0 14px; border-radius:14px; border:2px solid var(--line); background:var(--bg); color:var(--fg); font-size:20px; font-family:var(--font-display); letter-spacing:.1em}
+.ans{flex-wrap:nowrap} .ans .btn{flex:0 0 auto; white-space:nowrap} .ans input{flex:1 1 0; min-width:0; min-height:52px; padding:0 14px; border-radius:14px; border:2px solid var(--line); background:var(--bg); color:var(--fg); font-size:20px; font-family:var(--font-display); letter-spacing:.1em}
 .notice{border-left:4px solid var(--sun); background:var(--soft); padding:10px 12px; border-radius:10px; font-size:14.5px}
 .notice.purple{border-color:var(--grape)}
 .notice.coral{border-color:var(--coral)}
@@ -204,7 +254,7 @@ input[type=file]{display:none}
 .log .nophoto{width:56px; height:42px; border-radius:8px; background:var(--soft); display:grid; place-items:center; font-size:11px; color:var(--muted)}
 .log .tm{font-size:13px; color:var(--muted); white-space:nowrap}
 .pin{display:flex; gap:8px; margin-top:10px}
-.pin input{flex:1; min-height:50px; border-radius:12px; border:2px solid var(--line); background:var(--bg); color:var(--fg); font-size:20px; text-align:center; letter-spacing:.3em}
+.pin .btn{flex:0 0 auto} .pin input{flex:1 1 0; min-width:0; min-height:50px; border-radius:12px; border:2px solid var(--line); background:var(--bg); color:var(--fg); font-size:20px; text-align:center; letter-spacing:.3em}
 
 .toast{position:fixed; left:50%; bottom:24px; transform:translateX(-50%); background:#1C2A3A; color:#fff; padding:10px 16px; border-radius:999px; font-size:14px; z-index:60; opacity:0; pointer-events:none; transition:opacity .3s}
 .toast.show{opacity:1}
@@ -296,6 +346,31 @@ footer{margin-top:28px; font-size:13px; color:var(--muted); text-align:center}
 <!-- ───── 스테이션 (동적) ───── -->
 <section id="v-st" class="view"></section>
 
+<!-- ───── 설문 ───── -->
+<section id="v-survey" class="view">
+  <div class="eyebrow">보물 뽑기 전 1분 설문</div>
+  <h2>탐험은 어땠나요?</h2>
+  <p class="lead">보호자가 함께 적어 주세요. 다 적으면 보물 뽑기가 열려요.</p>
+  <div class="card" style="margin-top:14px">
+    <div class="field"><label>1. 오늘 탐험은 얼마나 재미있었나요?</label><div class="stars" id="q1"><button type="button" onclick="star(1)">⭐</button><button type="button" onclick="star(2)">⭐</button><button type="button" onclick="star(3)">⭐</button><button type="button" onclick="star(4)">⭐</button><button type="button" onclick="star(5)">⭐</button></div></div>
+    <div class="field"><label>2. 가장 좋았던 스테이션은?</label><select id="q2"><option value="">골라 주세요</option></select></div>
+    <div class="field"><label>3. 행사를 어떻게 알게 됐나요? (여러 개 가능)</label><div class="opts" id="q3"><button type="button" onclick="this.classList.toggle('on')">맘카페·SNS</button><button type="button" onclick="this.classList.toggle('on')">지인 소개</button><button type="button" onclick="this.classList.toggle('on')">포스터·현수막</button><button type="button" onclick="this.classList.toggle('on')">네이버 예약·검색</button><button type="button" onclick="this.classList.toggle('on')">학교·유치원</button><button type="button" onclick="this.classList.toggle('on')">기타</button></div></div>
+    <div class="field"><label>4. 내년에도 열리면 또 오시겠어요?</label><div class="opts" id="q4"><button type="button" onclick="pick('q4',this)">꼭 올래요</button><button type="button" onclick="pick('q4',this)">아마도요</button><button type="button" onclick="pick('q4',this)">잘 모르겠어요</button></div></div>
+    <div class="field"><label>5. 아쉬웠던 점이나 바라는 점 (선택)</label><textarea id="q5" placeholder="자유롭게 적어 주세요"></textarea></div>
+  </div>
+  <div class="card" style="margin-top:12px">
+    <h3>보호자 정보</h3>
+    <div class="field"><label>이름</label><input id="f-name" placeholder="보호자 이름" autocomplete="name"></div>
+    <div class="field"><label>사는 지역</label><select id="f-region"><option>밀양시</option><option>창원시</option><option>김해시</option><option>양산시</option><option>부산광역시</option><option>대구광역시</option><option>울산광역시</option><option>경남 기타</option><option>경북</option><option>기타</option></select></div>
+    <div class="field"><label>휴대폰 번호</label><input id="f-phone" inputmode="tel" placeholder="010-0000-0000" autocomplete="tel"></div>
+    <label class="chk"><input type="checkbox" id="c-mkt" checked><span><b>밀양 관광정보를 받아보시겠습니까?</b> 반하다밀양 여행 소식·이벤트를 문자로 보내드려요. (선택)</span></label>
+    <label class="chk"><input type="checkbox" id="c-priv"><span><b>개인정보 수집·이용 동의 (필수)</b><br>수집 항목: 이름·지역·휴대폰 번호·설문 응답 / 목적: 행사 운영·경품 지급 확인·만족도 조사(동의 시 관광정보 발송) / 보유 기간: 행사 종료 후 1년(관광정보 수신은 철회 시까지) / 동의를 거부할 수 있으나 거부 시 보물 뽑기 참여가 제한됩니다. 처리 주체: 밀양시(수행 가곡원류)</span></label>
+    <div class="err" id="sv-err"></div>
+    <button class="btn sun" style="margin-top:8px" onclick="submitSurvey()">제출하고 보물 뽑기 열기 🎁</button>
+    <button class="btn ghost" style="margin-top:8px" onclick="go('home')">← 홈으로</button>
+  </div>
+</section>
+
 <!-- ───── 뽑기권 ───── -->
 <section id="v-prize" class="view">
   <div class="ticket" id="ticket">
@@ -304,18 +379,32 @@ footer{margin-top:28px; font-size:13px; color:var(--muted); text-align:center}
     <div class="lbl" style="margin-top:10px">탐험대원 번호</div>
     <div class="num" id="tnum">0000</div>
     <div class="lbl">입장번호 <span id="tcode"></span> · 완주 <span id="tdone"></span></div>
+    <div class="prz" id="tprz" style="display:none"></div>
     <div class="done" id="tstamp" style="display:none">수령 완료</div>
   </div>
+
+  <div class="gacha" id="gacha">
+    <h3 style="color:#FFE9A8; font-size:22px">🎰 보물 뽑기</h3>
+    <p class="small" style="color:#C9D3E2" id="g-help">탐험본부 경품수령소 요원 앞에서 손잡이를 돌려요!</p>
+    <div class="machine" id="machine">
+      <img class="mimg" src="img/gacha-machine.webp" alt="" onload="this.parentNode.classList.add('hasimg')" onerror="this.remove()">
+      <div class="dome" id="dome"></div>
+      <div class="base"></div><div class="knob"></div><div class="tray"></div>
+      <div class="drop" id="drop" onclick="openCapsule()"></div>
+    </div>
+    <button class="btn sun" id="btn-draw" style="margin-top:12px; max-width:320px; margin-inline:auto" onclick="draw()">손잡이 돌리기!</button>
+    <div class="prize" id="prize"></div>
+  </div>
+
   <div class="card" style="margin-top:14px">
-    <h3>탐험본부 경품수령소에 이 화면을 보여주세요</h3>
-    <p class="lead">운영요원이 아래 기록을 확인하고 뽑기 1회를 드려요. 나만의 동화책도 여기서 받아요.</p>
+    <h3>운영요원 확인용 기록</h3>
     <div class="loglist" id="loglist"></div>
     <div id="extra-note" class="notice purple" style="margin-top:10px; display:none"></div>
   </div>
   <div class="card" style="margin-top:12px" id="staffbox">
     <h3>🔒 운영요원 확인</h3>
-    <p class="small">요원만 입력하세요. 처리하면 이 뽑기권은 「수령 완료」로 바뀝니다.</p>
-    <div class="pin"><input id="pin" inputmode="numeric" maxlength="4" placeholder="PIN"><button class="btn coral" style="width:auto; min-height:50px; white-space:nowrap; padding-inline:18px" onclick="claim()">수령 처리</button></div>
+    <p class="small">경품을 건네준 뒤 PIN을 입력하세요. 처리하면 이 뽑기권은 「수령 완료」로 바뀝니다.</p>
+    <div class="pin"><input id="pin" inputmode="numeric" maxlength="8" placeholder="PIN"><button class="btn coral" style="width:auto; min-height:50px; white-space:nowrap; padding-inline:18px" onclick="claim()">수령 처리</button></div>
     <div class="err" id="pin-err"></div>
   </div>
   <div class="stack">
@@ -339,11 +428,21 @@ footer{margin-top:28px; font-size:13px; color:var(--muted); text-align:center}
 const CONFIG = {
   OTP_SECRET: "sunshine-2026-1024",  // staff.html과 같아야 함
   OTP_SLOT_MIN: 30,                   // 입장번호 갱신 주기(분)
-  STAFF_PIN: "2410",                  // 경품수령소 요원 PIN
+  STAFF_PIN: "20240520",                  // 경품수령소 요원 PIN
   S8_ANSWER: ["물은보물","물은 보물"],
   GUIDE_URL: "https://gold-seven-sepia.vercel.app/",
   PET_URL: "https://star-companion.vercel.app/",
-  NEED: 5
+  NEED: 5,
+  // 설문·경품 재고 공유용 Supabase (비우면 이 휴대폰에만 저장 — 재고는 기기별로 따로 줄어듦)
+  SUPABASE_URL: "https://snaldhxucwsaifqrccih.supabase.co",
+  SUPABASE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNuYWxkaHh1Y3dzYWlmcXJjY2loIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyNzIwNjAsImV4cCI6MjEwMzg0ODA2MH0.TUdhun_cBHsool0e2FZOOfznjFoC_u5B0MJCl1dTDhI",
+  // 기본 경품 (관리자 페이지에서 수량 변경 가능, Supabase 연결 시 서버 값 우선)
+  PRIZES: [
+    {id:"pen", name:"씨앗 연필", emo:"✏️", qty:500},
+    {id:"mandu", name:"만두 몰랑이", emo:"🥟", qty:200},
+    {id:"mini", name:"소형 몰랑이", emo:"🐰", qty:90},
+    {id:"book", name:"동화책", emo:"📖", qty:10}
+  ]
 };
 
 /* ─────────── 스테이션 데이터 ─────────── */
@@ -369,18 +468,18 @@ const ST = [
   fx:"dragon", fxh:"동물 동료가 생겼어요!", fxp:"하얀 아기 용이 탐험대원을 따라나섭니다. 이제 둘이 함께 떠나요."},
  {id:"s7", code:"S7", name:"숨겨진 보물의 방", place:"7구역 에코리움 본관 전시실", img:"img/s7.jpg",
   tags:[["free","전원 체험"],["lim","무료 · 선착순"]], mission:"숨겨진 동물을 찾아라",
-  steps:[["전시실 속 동물 5마리를 찾아요","고양이 1마리, 강아지 1마리, 곰 3마리가 숨어 있어요. 찾을 때마다 아래 칸을 눌러 넣어요."],["인증사진","찾은 동물 중 하나와 찰칵!"]],
-  collect:[["🐱","고양이"],["🐶","강아지"],["🐻","곰 1"],["🐻","곰 2"],["🐻","곰 3"]],
+  steps:[["전시실 속 동물 5마리를 찾아 찍어요","고양이 1마리, 강아지 1마리, 곰 3마리가 숨어 있어요. 찾을 때마다 아래 칸을 눌러 그 동물을 찍어 넣어요. 5칸이 다 차면 완료!"]],
+  collect:[["🐱","고양이"],["🐶","강아지"],["🐻","곰 1"],["🐻","곰 2"],["🐻","곰 3"]], multiPhoto:true,
   note:["purple","🎨 <b>나만의 캐릭터 만들기</b> 무료 체험도 있어요 (인원 제한 · 선착순)."],
   fx:"talk", fxh:"동물과 대화하는 힘이 생겼어요!", fxp:"숨어 있던 친구들이 말을 걸어와요. 이제 동물의 말을 알아들을 수 있어요."},
  {id:"s8", code:"S8", name:"습지 암호 탐험로", place:"8구역 고산습지센터", img:"img/s8.jpg",
   tags:[["free","전원 체험"],["pay","난이도 ★★★"]], mission:"습지의 단서 4개로 암호를 풀어라",
-  steps:[["그림 단서판 4개를 찾아요","습지센터 안에 ①~④ 번호가 붙은 그림 카드가 숨어 있어요. 글자는 없고 그림만 있어요."],["인증사진","단서판 하나와 찰칵!"],["암호를 풀어요","그림의 <b>이름을 떠올리고 첫 글자만</b> ①②③④ 순서로 이어요. 예) 🍎 사과 → '사'"]],
+  noPhoto:true, steps:[["그림 단서판 4개를 찾아요","습지센터 안에 ①~④ 번호가 붙은 그림 카드가 숨어 있어요. 글자는 없고 그림만 있어요."],["암호를 풀어요","그림의 <b>이름을 떠올리고 첫 글자만</b> ①②③④ 순서로 이어요. 예) 🍎 사과 → '사'"]],
   clues:[["①","그림 이름의 첫 글자 → □"],["②","그림 이름의 첫 글자 → □"],["③","그림 이름의 첫 글자 → □"],["④","그림 이름의 첫 글자 → □"]],
   fx:"fall", fxh:"폭포를 가로질러 들어갑니다!", fxp:"암호가 맞았어요. 물의 장막이 갈라지고 비밀 통로가 열렸어요."},
  {id:"s9", code:"S9", name:"바람의정원", place:"9구역 자연체험학습장(에코리움 온실 옆)", img:"img/s9.jpg",
   tags:[["lim","무료 · 선착순"],["pay","유료 체험"]], mission:"바람의 정원에서 체험하기",
-  steps:[["무료 체험(선착순) 또는 유료 체험","탐조·씨앗 놀이·색종이 프로펠러 등 하나를 골라 체험해요. 유료 체험은 현금·계좌이체 시 50% 페이백."],["만든 것과 인증사진","바람개비나 작품을 들고 찰칵!"]],
+  steps:[["무료 체험(선착순) 또는 유료 체험","탐조·씨앗 놀이·색종이 프로펠러 등 하나를 골라 체험해요. 유료 체험은 현금·계좌이체 시 50% 페이백."],["만든 작품과 인증사진",""]],
   fx:"wind", fxh:"바람의 힘을 얻었어요!", fxp:"정원의 바람이 탐험대원을 밀어 줘요. 발걸음이 깃털처럼 가벼워요."},
 ];
 const OPT = [
@@ -393,7 +492,7 @@ const OPT = [
 const KEY="bt_state_v1";
 let S = load();
 function load(){ try{ return JSON.parse(localStorage.getItem(KEY)||"null") || fresh(); }catch(e){ return fresh(); } }
-function fresh(){ return {started:false, code:"", tnum:"", done:{}, photos:{}, visited:{}, claimed:null, extra:{}}; }
+function fresh(){ return {started:false, code:"", tnum:"", done:{}, photos:{}, slotPhotos:{}, visited:{}, claimed:null, extra:{}, survey:null, prize:null, pending:null}; }
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){ toast("저장 공간이 부족해요. 사진 저장이 안 될 수 있어요."); } }
 function resetAll(){ if(!confirm("기록과 사진 썸네일이 모두 지워져요. 처음부터 할까요?")) return; S=fresh(); save(); location.hash=""; go("start"); }
 const doneCount=()=>Object.keys(S.done).length;
@@ -423,6 +522,7 @@ function go(v, id){
   if(v==="st"){ renderSt(id); }
   if(v==="home"){ renderHome(); }
   if(v==="prize"){ renderPrize(); }
+  if(v==="survey"){ renderSurvey(); }
   if(v==="start"){ renderStart(); }
   document.getElementById("v-"+v).classList.add("show");
   window.scrollTo({top:0, behavior:"instant"});
@@ -452,7 +552,8 @@ function renderHome(){
   document.getElementById("prog-num").textContent = n;
   const b=document.getElementById("btn-prize");
   b.disabled = n<CONFIG.NEED;
-  b.textContent = n>=CONFIG.NEED ? (S.claimed ? "🎁 보물 뽑기권 (수령 완료) 보기" : "🎁 보물 뽑기권 열기") : `🎁 보물 뽑기권 — ${CONFIG.NEED-n}곳 더 모으면 열려요`;
+  b.textContent = n>=CONFIG.NEED ? (S.claimed ? "🎁 보물 뽑기 (수령 완료) 보기" : (S.survey ? "🎁 보물 뽑기 하러 가기" : "📝 설문하고 보물 뽑기 열기")) : `🎁 보물 뽑기 — ${CONFIG.NEED-n}곳 더 모으면 열려요`;
+  b.onclick=()=>go(S.survey||S.claimed ? "prize" : "survey");
   const L=document.getElementById("stlist"); L.innerHTML="";
   const s1done=!!S.done.s1;
   ST.forEach(st=>{
@@ -480,12 +581,21 @@ function renderSt(id){
   <div style="display:flex; gap:6px; margin-top:10px; flex-wrap:wrap">${cur.tags.map(t=>`<span class="tag ${t[0]}">${t[1]}</span>`).join("")}${done?'<span class="tag free">클리어 완료</span>':''}</div>
   <div class="card" style="margin-top:12px; display:grid; gap:14px">`;
   html+=step(cur.steps[0][0], cur.steps[0][1], "do");
-  if(cur.collect){ html+=`<div class="slots">${cur.collect.map((c,i)=>`<div class="slot" data-i="${i}" onclick="toggleSlot(${i})">${c[0]}<span>${c[1]}</span></div>`).join("")}</div><div style="height:12px"></div>`; }
-  html+=step(cur.steps[1][0], cur.steps[1][1], "photo");
-  html+=`<label class="photo" id="ph" for="file-st">${tmp.photo?`<img src="${tmp.photo}" alt=""><span class="ok">저장됨</span>`:"<span>📷 눌러서 사진 찍기</span>"}</label><input type="file" id="file-st" accept="image/*" capture="environment">
-  <div class="row" style="margin-top:-4px"><button class="btn ghost" style="min-height:44px; font-size:16px" onclick="document.getElementById('file-st').click()">${tmp.photo?"다시 찍기":"사진 찍기"}</button><button class="btn ghost" style="min-height:44px; font-size:16px" id="btn-save" onclick="savePhoto()" ${tmp.photo?"":"disabled"}>내 폰에 저장</button></div>`;
-  if(cur.quiz){ html+=step(cur.steps[2][0], cur.steps[2][1], "quiz")+`<div><p style="font-weight:700">${cur.quiz.q}</p><div class="quiz" id="quiz">${cur.quiz.a.map((a,i)=>`<button type="button" onclick="answer(${i},this)">${["①","②","③","④"][i]} ${a}</button>`).join("")}</div><p class="small" id="quiz-why" style="margin-top:6px"></p></div>`; }
-  if(cur.clues){ html+=step(cur.steps[2][0], cur.steps[2][1], "riddle")+`<div class="clues">${cur.clues.map(c=>`<div class="clue"><b>${c[0]}</b>${c[1]}</div>`).join("")}</div><div class="ans"><input id="ans" placeholder="네 글자 암호" maxlength="8" autocomplete="off"><button class="btn sky" style="width:auto; min-height:52px" onclick="riddle()">확인</button></div><div class="err" id="ans-err"></div><p class="small" style="margin-top:6px">띄어쓰기 없이 네 글자</p>`; }
+  if(cur.multiPhoto){
+    tmp.slots=(S.slotPhotos&&S.slotPhotos[id])||{}; tmp.slotBlobs={}; tmp.collect=Object.keys(tmp.slots).length; if(tmp.collect) tmp.photo=Object.values(tmp.slots)[0];
+    html+=`<div class="slots photo5">${cur.collect.map((c,i)=>`<div class="slot ${tmp.slots[i]?'on':''}" data-i="${i}" onclick="slotShoot(${i})">${tmp.slots[i]?`<img src="${tmp.slots[i]}" alt="">`:c[0]}<span>${c[1]}</span></div>`).join("")}</div>
+    <input type="file" id="file-slot" accept="image/*" capture="environment">
+    <button class="btn ghost" style="min-height:44px; font-size:16px" id="btn-save5" onclick="saveSlots()" ${tmp.collect?"":"disabled"}>찍은 사진 내 폰에 저장 (원본+프레임)</button>`;
+  } else if(cur.noPhoto){
+    tmp.photo="none";
+  } else {
+    html+=step(cur.steps[1][0], cur.steps[1][1], "photo");
+    html+=`<label class="photo" id="ph" for="file-st">${tmp.photo?`<img src="${tmp.photo}" alt=""><span class="ok">저장됨</span>`:"<span>📷 눌러서 사진 찍기</span>"}</label><input type="file" id="file-st" accept="image/*" capture="environment">
+    <div class="row" style="margin-top:-4px"><button class="btn ghost" style="min-height:44px; font-size:16px" onclick="document.getElementById('file-st').click()">${tmp.photo?"다시 찍기":"사진 찍기"}</button><button class="btn ghost" style="min-height:44px; font-size:16px" id="btn-save" onclick="savePhoto()" ${tmp.photo?"":"disabled"}>내 폰에 저장 (원본+프레임)</button></div>`;
+  }
+  const qi = cur.noPhoto ? 1 : 2;
+  if(cur.quiz){ html+=step(cur.steps[qi][0], cur.steps[qi][1], "quiz")+`<div><p style="font-weight:700">${cur.quiz.q}</p><div class="quiz" id="quiz">${cur.quiz.a.map((a,i)=>`<button type="button" onclick="answer(${i},this)">${["①","②","③","④"][i]} ${a}</button>`).join("")}</div><p class="small" id="quiz-why" style="margin-top:6px"></p></div>`; }
+  if(cur.clues){ html+=step(cur.steps[qi][0], cur.steps[qi][1], "riddle")+`<div class="clues">${cur.clues.map(c=>`<div class="clue"><b>${c[0]}</b>${c[1]}</div>`).join("")}</div><div class="ans"><input id="ans" placeholder="네 글자 암호" maxlength="8" autocomplete="off"><button class="btn sky" style="width:auto; min-height:52px" onclick="riddle()">확인</button></div><div class="err" id="ans-err"></div><p class="small" style="margin-top:6px">띄어쓰기 없이 네 글자</p>`; }
   if(cur.choice){ html+=`<div class="notice"><b>${cur.choice.t}</b><br>${cur.choice.d}<div class="row" style="margin-top:8px"><a class="btn sky" style="min-height:44px; font-size:16px" href="${CONFIG[cur.choice.url]}" target="_blank" rel="noopener" onclick="choose(true)">${cur.choice.yes}</a><button class="btn ghost" style="min-height:44px; font-size:16px" onclick="choose(false)">${cur.choice.no}</button></div><p class="small" id="choice-st" style="margin-top:6px"></p></div>`; }
   if(cur.note){ html+=`<div class="notice ${cur.note[0]}">${cur.note[1]}</div>`; }
   html+=`</div>
@@ -493,9 +603,10 @@ function renderSt(id){
     <button class="btn sun" id="btn-done" onclick="complete()" ${done?"":"disabled"}>${done?"다시 통과하기 (기록 유지)":"완료! 다음 지역 탐험하기"}</button>
     <button class="btn ghost" onclick="go('home')">← 다른 스테이션 고르기</button>
   </div>
-  <p class="small" style="text-align:center; margin-top:10px">인증사진을 찍어야 「완료」 버튼이 열려요. 카메라가 안 되면 운영요원에게 종이 여권 날인을 받으세요.</p>`;
+  <p class="small" style="text-align:center; margin-top:10px">${cur.noPhoto?"암호를 맞혀야 「완료」 버튼이 열려요.":"인증사진을 찍어야 「완료」 버튼이 열려요. 카메라가 안 되면 운영요원에게 종이 여권 날인을 받으세요."}</p>`;
   v.innerHTML=html;
-  document.getElementById("file-st").addEventListener("change", onPhoto);
+  const fs=document.getElementById("file-st"); if(fs) fs.addEventListener("change", onPhoto);
+  const fl=document.getElementById("file-slot"); if(fl) fl.addEventListener("change", onSlotPhoto);
   if(done){ markOk("do"); markOk("photo"); }
   gate();
 }
@@ -504,15 +615,27 @@ function gate(){
   const ok = !!tmp.photo && (!cur.quiz || tmp.quiz) && (!cur.collect || tmp.collect>=cur.collect.length) && (!cur.clues || tmp.riddle) && tmp.choice;
   const b=document.getElementById("btn-done"); if(b && !S.done[cur.id]) b.disabled=!ok;
 }
-function toggleSlot(i){ const el=document.querySelector(`.slot[data-i="${i}"]`); el.classList.toggle("on"); tmp.collect=document.querySelectorAll(".slot.on").length; if(tmp.collect>=cur.collect.length) markOk("do"); gate(); }
+let slotIdx=0;
+function slotShoot(i){ slotIdx=i; document.getElementById("file-slot").click(); }
+function onSlotPhoto(e){ const f=e.target.files[0]; if(!f) return; const i=slotIdx; const label=cur.name+" · "+cur.collect[i][1];
+  frame(f, label, (thumb, blob)=>{ tmp.slots[i]=thumb; tmp.slotBlobs[i]={orig:f, framed:blob, label}; S.slotPhotos=S.slotPhotos||{}; S.slotPhotos[cur.id]=tmp.slots; save();
+    const el=document.querySelector(`.slot[data-i="${i}"]`); el.classList.add("on"); el.innerHTML=`<img src="${thumb}" alt=""><span>${cur.collect[i][1]}</span>`;
+    tmp.collect=Object.keys(tmp.slots).length; tmp.photo=Object.values(tmp.slots)[0]; document.getElementById("btn-save5").disabled=false;
+    if(tmp.collect>=cur.collect.length){ markOk("do"); toast("5마리 모두 찾았어요!"); } else toast(`${tmp.collect}/5 찾았어요`);
+    gate(); e.target.value=""; }); }
+async function saveSlots(){ const files=[]; const t=Date.now();
+  Object.entries(tmp.slotBlobs).forEach(([i,b])=>{ const base=`보물섬탐험대_${b.label.replace(/[\s·]/g,"")}_${t}`; files.push(new File([b.orig], base+"_원본.jpg",{type:b.orig.type||"image/jpeg"})); files.push(new File([b.framed], base+"_탐험대.jpg",{type:"image/jpeg"})); });
+  if(!files.length){ toast("이번에 찍은 사진이 없어요 (이전 사진은 이미 저장됨)"); return; }
+  if(navigator.canShare && navigator.canShare({files})){ try{ await navigator.share({files, title:"선샤인 보물섬 탐험대"}); return; }catch(e){ if(e.name==="AbortError") return; } }
+  files.forEach((f,i)=>setTimeout(()=>{ const a=document.createElement("a"); a.href=URL.createObjectURL(f); a.download=f.name; document.body.appendChild(a); a.click(); a.remove(); }, i*500)); toast(`사진 ${files.length}장을 내려받았어요`); }
 function answer(i,btn){ const bs=[...document.querySelectorAll("#quiz button")]; bs.forEach(b=>b.classList.remove("sel","bad")); if(i===cur.quiz.ok){ btn.classList.add("good"); tmp.quiz=true; document.getElementById("quiz-why").textContent="정답! "+cur.quiz.why; markOk("quiz"); bs.forEach(b=>b.disabled=true); } else { btn.classList.add("bad"); document.getElementById("quiz-why").textContent="아쉬워요, 다시 도전!"; } gate(); }
 function riddle(){ const v=document.getElementById("ans").value.replace(/\s/g,""); const ok=CONFIG.S8_ANSWER.map(a=>a.replace(/\s/g,"")).includes(v); const e=document.getElementById("ans-err"); if(ok){ tmp.riddle=true; e.style.color="var(--leaf)"; e.textContent="암호가 맞아요!"; markOk("riddle"); } else { e.style.color=""; e.textContent="틀렸어요. 그림 이름의 첫 글자를 ①~④ 순서로 다시 이어 봐요."; } gate(); }
 function choose(yes){ tmp.choice=true; S.extra[cur.id+"_pet"]=yes; save(); document.getElementById("choice-st").textContent = yes ? "별동산이 새 창에서 열렸어요. 완성하면 이 화면으로 돌아와 「완료」를 누르세요." : "넘어갈게요."; gate(); }
 
 /* 사진: 프레임 합성 → 썸네일(로컬 기록) + 원본 저장(다운로드/공유) */
-let lastBlob=null;
-function onPhoto(e){ const f=e.target.files[0]; if(!f) return; frame(f, cur.name, (thumb, blob)=>{ tmp.photo=thumb; lastBlob=blob; const ph=document.getElementById("ph"); ph.innerHTML=`<img src="${thumb}" alt=""><span class="ok">찍었어요</span>`; document.getElementById("btn-save").disabled=false; markOk("photo"); gate(); toast("「내 폰에 저장」을 누르면 갤러리에 담겨요"); }); }
-document.getElementById("file-depart").addEventListener("change", e=>{ const f=e.target.files[0]; if(!f) return; frame(f, "탐험대 출정식", (thumb,blob)=>{ S.photos.depart=thumb; save(); lastBlob=blob; document.getElementById("ph-depart").innerHTML=`<img src="${thumb}" alt=""><span class="ok">찍었어요</span>`; const b=document.getElementById("btn-start"); b.disabled=false; b.textContent="탐험 시작!"; savePhoto("탐험대출정식"); }); });
+let lastBlob=null, origBlob=null, lastLabel="";
+function onPhoto(e){ const f=e.target.files[0]; if(!f) return; origBlob=f; lastLabel=cur.name; frame(f, cur.name, (thumb, blob)=>{ tmp.photo=thumb; lastBlob=blob; const ph=document.getElementById("ph"); ph.innerHTML=`<img src="${thumb}" alt=""><span class="ok">찍었어요</span>`; document.getElementById("btn-save").disabled=false; markOk("photo"); gate(); savePhoto(cur.name, true); }); }
+document.getElementById("file-depart").addEventListener("change", e=>{ const f=e.target.files[0]; if(!f) return; origBlob=f; lastLabel="탐험대 출정식"; frame(f, "탐험대 출정식", (thumb,blob)=>{ S.photos.depart=thumb; lastBlob=blob; document.getElementById("ph-depart").innerHTML=`<img src="${thumb}" alt=""><span class="ok">찍었어요</span>`; const b=document.getElementById("btn-start"); b.disabled=false; b.textContent="탐험 시작!"; savePhoto("탐험대출정식", true); }); });
 function frame(file, label, cb){
   const img=new Image(); const url=URL.createObjectURL(file);
   img.onload=()=>{ const cv=document.getElementById("cv"); const max=1600; const sc=Math.min(1, max/Math.max(img.width,img.height)); cv.width=Math.round(img.width*sc); cv.height=Math.round(img.height*sc);
@@ -523,18 +646,25 @@ function frame(file, label, cb){
     cv.toBlob(b=>{ const t=document.createElement("canvas"); const ts=Math.min(1, 360/Math.max(cv.width,cv.height)); t.width=Math.round(cv.width*ts); t.height=Math.round(cv.height*ts); t.getContext("2d").drawImage(cv,0,0,t.width,t.height); cb(t.toDataURL("image/jpeg",.6), b); URL.revokeObjectURL(url); }, "image/jpeg", .9); };
   img.src=url;
 }
-async function savePhoto(name){
+/* 원본 + 프레임 합성본 두 장을 갤러리로: 공유 시트(저장) → 안 되면 다운로드 2회 */
+async function savePhoto(name, auto){
   if(!lastBlob){ toast("먼저 사진을 찍어요"); return; }
-  const fn=`보물섬탐험대_${(name||cur.name).replace(/\s/g,"")}_${Date.now()}.jpg`;
-  const file=new File([lastBlob], fn, {type:"image/jpeg"});
-  if(navigator.canShare && navigator.canShare({files:[file]})){ try{ await navigator.share({files:[file], title:"선샤인 보물섬 탐험대"}); toast("저장·공유 창을 열었어요"); return; }catch(e){ if(e.name==="AbortError") return; } }
-  const a=document.createElement("a"); a.href=URL.createObjectURL(lastBlob); a.download=fn; document.body.appendChild(a); a.click(); a.remove(); toast("사진을 내려받았어요 (갤러리·파일 앱 확인)");
+  const base=`보물섬탐험대_${(name||lastLabel||"").replace(/\s/g,"")}_${Date.now()}`;
+  const files=[new File([lastBlob], base+"_탐험대.jpg", {type:"image/jpeg"})];
+  if(origBlob) files.unshift(new File([origBlob], base+"_원본.jpg", {type:origBlob.type||"image/jpeg"}));
+  if(navigator.canShare && navigator.canShare({files})){
+    try{ await navigator.share({files, title:"선샤인 보물섬 탐험대"}); toast("두 장(원본·탐험대 프레임)을 저장할 수 있어요"); return; }
+    catch(e){ if(e.name==="AbortError") return; if(auto){ toast("「내 폰에 저장」을 눌러 갤러리에 담아요"); return; } }
+  }
+  if(auto && !("download" in document.createElement("a"))){ return; }
+  files.forEach((f,i)=>setTimeout(()=>{ const a=document.createElement("a"); a.href=URL.createObjectURL(f); a.download=f.name; document.body.appendChild(a); a.click(); a.remove(); }, i*600));
+  toast("사진 2장을 내려받았어요 (갤러리·파일 앱 확인)");
 }
 
 /* 완료 → 특수효과 → 홈 */
 function complete(){
   const first=!S.done[cur.id];
-  if(first){ S.done[cur.id]=Date.now(); S.photos[cur.id]=tmp.photo; S.lastPop=cur.id; save(); }
+  if(first){ S.done[cur.id]=Date.now(); S.photos[cur.id]=(tmp.photo==="none"?null:tmp.photo); S.lastPop=cur.id; save(); }
   fxShow(cur, ()=>{ go("home"); if(first && doneCount()===CONFIG.NEED) setTimeout(()=>toast("🎉 지도 완성! 보물 뽑기권이 열렸어요"),400); });
 }
 
@@ -563,27 +693,86 @@ function fxClose(){ document.getElementById("fx").className="fx"; document.getEl
 function chime(kind){ try{ const A=new (window.AudioContext||window.webkitAudioContext)(); const notes={map:[523,659,784],magic:[440,554,659,880],aura:[392,494,587,784],dragon:[523,784,1047],talk:[659,784,659,880],fall:[294,370,440,587],wind:[587,740,880,1175]}[kind]||[523,659,784];
   notes.forEach((f,i)=>{ const o=A.createOscillator(), g=A.createGain(); o.type="triangle"; o.frequency.value=f; g.gain.setValueAtTime(0,A.currentTime+i*.14); g.gain.linearRampToValueAtTime(.18,A.currentTime+i*.14+.03); g.gain.exponentialRampToValueAtTime(.001,A.currentTime+i*.14+.5); o.connect(g).connect(A.destination); o.start(A.currentTime+i*.14); o.stop(A.currentTime+i*.14+.55); }); }catch(e){} }
 
-/* ─────────── 뽑기권 ─────────── */
+/* ─────────── 설문 ─────────── */
+const SV={q1:0,q4:""};
+function star(n){ SV.q1=n; [...document.querySelectorAll("#q1 button")].forEach((b,i)=>b.classList.toggle("on",i<n)); }
+function pick(id,btn){ [...document.querySelectorAll("#"+id+" button")].forEach(b=>b.classList.remove("on")); btn.classList.add("on"); SV[id]=btn.textContent; }
+function renderSurvey(){ const q2=document.getElementById("q2"); q2.innerHTML='<option value="">골라 주세요</option>'+Object.keys(S.done).map(id=>{const st=ST.find(x=>x.id===id); return `<option>${st.code} ${st.name}</option>`;}).join(""); }
+async function submitSurvey(){
+  const err=document.getElementById("sv-err");
+  const name=document.getElementById("f-name").value.trim(), region=document.getElementById("f-region").value, phone=document.getElementById("f-phone").value.replace(/\D/g,"");
+  const q2=document.getElementById("q2").value, q3=[...document.querySelectorAll("#q3 button.on")].map(b=>b.textContent), q5=document.getElementById("q5").value.trim();
+  if(!SV.q1){ err.textContent="1번 별점을 눌러 주세요."; return; }
+  if(!q2){ err.textContent="2번 스테이션을 골라 주세요."; return; }
+  if(!SV.q4){ err.textContent="4번을 골라 주세요."; return; }
+  if(name.length<2){ err.textContent="보호자 이름을 적어 주세요."; return; }
+  if(!/^01\d{8,9}$/.test(phone)){ err.textContent="휴대폰 번호를 확인해 주세요."; return; }
+  if(!document.getElementById("c-priv").checked){ err.textContent="개인정보 수집·이용 동의(필수)에 체크해 주세요."; return; }
+  err.textContent="";
+  const row={tnum:S.tnum, code:S.code, name, region, phone, marketing:document.getElementById("c-mkt").checked, privacy:true, q1:SV.q1, q2, q3:q3.join(","), q4:SV.q4, q5, done:Object.keys(S.done).join(","), created_at:new Date().toISOString(), device:navigator.userAgent.slice(0,80)};
+  S.survey=row; save();
+  sb("bt_survey","POST",row).then(ok=>{ if(!ok) queue("bt_survey",row); });
+  toast("고마워요! 보물 뽑기가 열렸어요 🎁"); go("prize");
+}
+/* ─────────── Supabase 얇은 래퍼 (미설정 시 false) ─────────── */
+const SBON=()=>!!(CONFIG.SUPABASE_URL&&CONFIG.SUPABASE_KEY);
+async function sb(path, method, body, extra){ if(!SBON()) return false;
+  try{ const r=await fetch(CONFIG.SUPABASE_URL+"/rest/v1/"+path,{method, headers:{apikey:CONFIG.SUPABASE_KEY, Authorization:"Bearer "+CONFIG.SUPABASE_KEY, "Content-Type":"application/json", Prefer:"return=representation", ...(extra||{})}, body:body?JSON.stringify(body):undefined}); if(!r.ok) return false; return await r.json().catch(()=>true); }catch(e){ return false; } }
+function queue(t,row){ try{ const q=JSON.parse(localStorage.getItem("bt_queue")||"[]"); q.push({t,row}); localStorage.setItem("bt_queue",JSON.stringify(q)); }catch(e){} }
+async function flush(){ if(!SBON()) return; let q=[]; try{ q=JSON.parse(localStorage.getItem("bt_queue")||"[]"); }catch(e){} const left=[]; for(const it of q){ const ok=await sb(it.t,"POST",it.row); if(!ok) left.push(it); } try{ localStorage.setItem("bt_queue",JSON.stringify(left)); }catch(e){} }
+window.addEventListener("online", flush);
+
+/* ─────────── 뽑기 ─────────── */
+function stockLocal(){ try{ return JSON.parse(localStorage.getItem("bt_stock")||"null") || CONFIG.PRIZES.map(p=>({...p})); }catch(e){ return CONFIG.PRIZES.map(p=>({...p})); } }
+async function drawPrize(){
+  if(SBON()){ const r=await sb("rpc/bt_draw_prize","POST",{p_tnum:S.tnum}); if(r && r.id) return r; }
+  const st=stockLocal(); const pool=st.filter(p=>p.qty>0); if(!pool.length) return null;
+  const tot=pool.reduce((a,p)=>a+p.qty,0); let x=Math.random()*tot; let hit=pool[0]; for(const p of pool){ x-=p.qty; if(x<=0){ hit=p; break; } }
+  hit.qty--; try{ localStorage.setItem("bt_stock",JSON.stringify(st)); }catch(e){}
+  const draws=JSON.parse(localStorage.getItem("bt_draws")||"[]"); draws.push({tnum:S.tnum, prize:hit.id, at:Date.now()}); try{ localStorage.setItem("bt_draws",JSON.stringify(draws)); }catch(e){}
+  return hit;
+}
+let drawing=false;
+async function draw(){
+  if(drawing || S.prize) return; drawing=true;
+  const m=document.getElementById("machine"), b=document.getElementById("btn-draw"); b.disabled=true; b.textContent="두구두구…";
+  m.classList.add("shake","turn"); chime("magic"); try{ navigator.vibrate&&navigator.vibrate([60,40,60,40,120]); }catch(e){}
+  const p=await drawPrize();
+  setTimeout(()=>{ m.classList.remove("shake"); const d=document.getElementById("drop"); d.classList.add("go"); b.textContent="캡슐을 눌러 열어요!"; document.getElementById("g-help").textContent="캡슐이 나왔어요! 톡 눌러서 열어 보세요"; S.pending=p?{id:p.id,name:p.name,emo:p.emo}:{id:"none",name:"경품 소진 — 요원에게 문의",emo:"🙏"}; save(); drawing=false; }, 1800);
+}
+function openCapsule(){ const d=document.getElementById("drop"); if(!d.classList.contains("go") || !S.pending) return; d.classList.add("pop"); chime("wind");
+  setTimeout(()=>{ const p=S.pending; S.prize={...p, at:Date.now()}; S.pending=null; save(); showPrize(); }, 500); }
+function showPrize(){ const p=S.prize; if(!p) return; const el=document.getElementById("prize"); const img=`img/prize-${p.id}.webp`;
+  el.innerHTML=`<img class="pimg" src="${img}" alt="" onerror="this.outerHTML='<div class=emo>${p.emo}</div>'"><h3>${p.name}</h3><p>축하해요! 운영요원에게 이 화면을 보여주고 받아 가세요.</p>`+Array.from({length:24},(_,i)=>`<i class="conf" style="left:${Math.random()*100}%; background:${["#FFC63D","#D9453A","#2A6FD1","#2E8B57","#C39BE8"][i%5]}; animation-delay:${Math.random()*1.5}s; animation-duration:${2+Math.random()*1.5}s"></i>`).join("");
+  el.classList.add("show"); document.getElementById("btn-draw").style.display="none"; document.getElementById("g-help").textContent="뽑기 완료!"; document.getElementById("drop").style.display="none";
+  const t=document.getElementById("tprz"); t.style.display="block"; t.textContent=`🎁 뽑은 경품: ${p.name}`; }
+
+/* ─────────── 뽑기권 화면 ─────────── */
 function renderPrize(){
   document.getElementById("tnum").textContent=S.tnum||"----";
   document.getElementById("tcode").textContent=S.code||"";
   const times=Object.values(S.done).sort(); const fin=times[CONFIG.NEED-1]||times[times.length-1];
   document.getElementById("tdone").textContent = fin ? fmt(fin) : "-";
+  const dome=document.getElementById("dome"); dome.innerHTML=Array.from({length:12},(_,i)=>`<i class="cap" style="--c:${["#FFC63D","#D9453A","#2A6FD1","#2E8B57","#C39BE8","#FF8DA1"][i%6]}; left:${8+(i%4)*42}px; top:${70+Math.floor(i/4)*34}px; animation-delay:${(i*.13)%1.6}s"></i>`).join("");
+  const g=document.getElementById("gacha"), b=document.getElementById("btn-draw"), pr=document.getElementById("prize"), d=document.getElementById("drop");
+  pr.className="prize"; pr.innerHTML=""; d.className="drop"; d.style.display=""; b.style.display=""; b.disabled=false; b.textContent="손잡이 돌리기!"; { const m=document.getElementById("machine"), mi=m.querySelector(".mimg"); m.className="machine"+((mi&&mi.complete&&mi.naturalWidth>0)?" hasimg":""); } document.getElementById("tprz").style.display="none";
+  if(!S.survey && !S.claimed){ g.style.display="none"; } else { g.style.display="block"; }
+  if(S.prize) showPrize(); else if(S.pending){ d.classList.add("go"); b.textContent="캡슐을 눌러 열어요!"; b.disabled=true; }
   const L=document.getElementById("loglist"); L.innerHTML="";
   Object.entries(S.done).sort((a,b)=>a[1]-b[1]).forEach(([id,t],i)=>{ const st=ST.find(s=>s.id===id); const p=S.photos[id]; const el=document.createElement("div"); el.className="log";
-    el.innerHTML=`${p?`<img src="${p}" alt="">`:`<div class="nophoto">사진 없음</div>`}<div><b>${i+1}. ${st.code} ${st.name}</b><div class="small">${st.mission}</div></div><div class="tm">${fmt(t)}</div>`; L.appendChild(el); });
-  const ex=[]; if(S.extra.s5_pet) ex.push("🐾 별동산 애완동물 만들기 참여"); if(S.done.s3) ex.push("📖 S3 나만의 동화 만들기 참여자라면 동화책도 함께 수령");
+    el.innerHTML=`${p?`<img src="${p}" alt="">`:`<div class="nophoto">${st.noPhoto?"암호 통과":"사진 없음"}</div>`}<div><b>${i+1}. ${st.code} ${st.name}</b><div class="small">${st.mission}</div></div><div class="tm">${fmt(t)}</div>`; L.appendChild(el); });
+  const ex=[]; if(S.extra.s5_pet) ex.push("🐾 별동산 애완동물 만들기 참여"); if(S.done.s3) ex.push("📖 S3 나만의 동화 만들기 참여자라면 동화책도 함께 수령"); if(S.survey) ex.push(`📝 설문 완료 · ${S.survey.name} · ${S.survey.region}${S.survey.marketing?" · 관광정보 수신 동의":""}`);
   const en=document.getElementById("extra-note"); if(ex.length){ en.style.display="block"; en.innerHTML=ex.join("<br>"); } else en.style.display="none";
   const claimed=!!S.claimed; document.getElementById("tstamp").style.display=claimed?"block":"none"; document.getElementById("staffbox").style.display=claimed?"none":"block";
   if(claimed) document.getElementById("tdone").textContent += " · 수령 "+fmt(S.claimed);
 }
-function claim(){ const p=document.getElementById("pin").value; const e=document.getElementById("pin-err"); if(p!==CONFIG.STAFF_PIN){ e.textContent="PIN이 맞지 않아요."; return; } if(!confirm("뽑기 1회 수령 처리할까요? 되돌릴 수 없어요.")) return; S.claimed=Date.now(); save(); renderPrize(); toast("수령 처리 완료"); }
+function claim(){ const p=document.getElementById("pin").value; const e=document.getElementById("pin-err"); if(p!==CONFIG.STAFF_PIN){ e.textContent="PIN이 맞지 않아요."; return; } if(!S.prize){ e.textContent="먼저 뽑기를 진행해 주세요."; return; } if(!confirm(`「${S.prize.name}」 수령 처리할까요? 되돌릴 수 없어요.`)) return; S.claimed=Date.now(); save(); sb("bt_draws?tnum=eq."+encodeURIComponent(S.tnum)+"&claimed_at=is.null","PATCH",{claimed_at:new Date().toISOString()},{Prefer:"return=minimal"}); renderPrize(); toast("수령 처리 완료"); }
 function fmt(t){ const d=new Date(t); return `${d.getHours()}:${String(d.getMinutes()).padStart(2,"0")}`; }
 
 /* ─────────── 공용 ─────────── */
 let tt; function toast(m){ const t=document.getElementById("toast"); t.textContent=m; t.classList.add("show"); clearTimeout(tt); tt=setTimeout(()=>t.classList.remove("show"),2600); }
 window.addEventListener("pageshow", ()=>{ /* 별동산에서 돌아왔을 때 선택 상태 유지 */ });
-go(S.started ? "home" : "start");
+go(S.started ? "home" : "start"); flush();
 </script>
 </body>
 </html>

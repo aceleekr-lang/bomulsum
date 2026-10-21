@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>관리자 — 보물섬 미션투어</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;700&display=swap">
+<style>
+:root{--bg:#FFFBF1; --fg:#1C2A3A; --muted:#5B6878; --card:#fff; --line:#EADFC6; --soft:#FFF3CF; --sky:#2A6FD1; --sun:#FFC63D; --coral:#D9453A; --leaf:#2E8B57}
+*{box-sizing:border-box} body{margin:0; background:var(--bg); color:var(--fg); font-family:"Noto Sans KR",sans-serif; font-size:16px}
+.wrap{max-width:860px; margin:0 auto; padding:16px}
+h1,h2{font-family:"Jua",sans-serif; font-weight:400; margin:0} h1{font-size:26px} h2{font-size:20px; margin-bottom:8px}
+.card{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:16px; margin-top:14px; box-shadow:0 6px 20px rgba(60,40,0,.06)}
+table{width:100%; border-collapse:collapse; font-size:15px} th,td{padding:8px 6px; border-bottom:1px solid var(--line); text-align:left; vertical-align:middle} th{background:var(--soft); font-size:13px}
+input[type=number],input[type=text],input[type=password]{min-height:40px; padding:0 10px; border-radius:10px; border:2px solid var(--line); font-size:16px; width:100%}
+.btn{min-height:44px; padding:0 16px; border-radius:12px; border:0; font-family:"Jua",sans-serif; font-size:17px; cursor:pointer; background:var(--sun); color:#3A2A00}
+.btn.sky{background:var(--sky); color:#fff} .btn.ghost{background:transparent; border:2px solid var(--line); color:var(--fg)} .btn.coral{background:var(--coral); color:#fff}
+.row{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+.kpi{display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px}
+.kpi div{background:var(--soft); border-radius:12px; padding:12px; text-align:center} .kpi b{display:block; font-family:"Jua",sans-serif; font-size:28px; color:var(--coral)}
+.small{font-size:13px; color:var(--muted)} .ok{color:var(--leaf); font-weight:700} .bad{color:var(--coral); font-weight:700}
+.otp{font-family:"Jua",sans-serif; font-size:48px; letter-spacing:.12em}
+.bar{height:10px; background:var(--line); border-radius:5px; overflow:hidden} .bar i{display:block; height:100%; background:var(--leaf)}
+</style></head><body><div class="wrap">
+<div id="gate" class="card" style="max-width:380px; margin:40px auto"><h1>관리자</h1><p class="small">운영요원 PIN</p><input type="password" id="pin" inputmode="numeric" maxlength="8"><button class="btn" style="margin-top:10px; width:100%" onclick="unlock()">열기</button></div>
+
+<div id="main" style="display:none">
+  <h1>🏴‍☠️ 보물섬 미션투어 관리자</h1>
+  <p class="small" id="mode"></p>
+
+  <div class="card"><h2>지금 입장번호</h2><div class="row"><div class="otp" id="otp">----</div><div class="small">다음 <b id="otp-n"></b> · 직전 <b id="otp-p"></b> · <span id="otp-left"></span>분 후 변경</div></div></div>
+
+  <div class="card"><h2>경품 재고</h2>
+    <div class="kpi" id="kpi"></div>
+    <table style="margin-top:10px"><thead><tr><th>경품</th><th style="width:110px">남은 수량</th><th style="width:90px">뽑힘</th><th style="width:40%">진행</th></tr></thead><tbody id="stock"></tbody></table>
+    <div class="row" style="margin-top:10px"><button class="btn" onclick="saveStock()">수량 저장</button><button class="btn ghost" onclick="addPrize()">+ 경품 추가</button><button class="btn ghost" onclick="load()">새로고침</button></div>
+    <p class="small" style="margin-top:8px">확률은 남은 수량에 비례합니다. 수량을 0으로 두면 더 이상 나오지 않아요. 동화책은 S3 동화 만들기 참여자에게 별도로 주려면 수량을 0으로 두고 경품수령소에서 직접 지급하세요.</p>
+  </div>
+
+  <div class="card"><h2>뽑기 기록</h2><p class="small" id="draw-sum"></p><div style="max-height:260px; overflow:auto"><table><thead><tr><th>시각</th><th>탐험대원</th><th>경품</th><th>수령</th></tr></thead><tbody id="draws"></tbody></table></div></div>
+
+  <div class="card"><h2>설문 응답</h2><p class="small" id="sv-sum"></p>
+    <div class="row"><button class="btn sky" onclick="csv()">CSV 내려받기</button><span class="small">이름·지역·전화·수신동의·문항 전체</span></div>
+    <div style="max-height:320px; overflow:auto; margin-top:10px"><table><thead><tr><th>시각</th><th>이름</th><th>지역</th><th>전화</th><th>수신</th><th>별점</th><th>최고 스테이션</th><th>재방문</th></tr></thead><tbody id="sv"></tbody></table></div>
+  </div>
+</div>
+
+<script>
+/* index.html CONFIG와 동일하게 */
+const CFG={ OTP_SECRET:"sunshine-2026-1024", OTP_SLOT_MIN:30, STAFF_PIN:"20240520", SUPABASE_URL:"https://snaldhxucwsaifqrccih.supabase.co", SUPABASE_KEY:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNuYWxkaHh1Y3dzYWlmcXJjY2loIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyNzIwNjAsImV4cCI6MjEwMzg0ODA2MH0.TUdhun_cBHsool0e2FZOOfznjFoC_u5B0MJCl1dTDhI",
+  PRIZES:[{id:"pen",name:"씨앗 연필",emo:"✏️",qty:500},{id:"mandu",name:"만두 몰랑이",emo:"🥟",qty:200},{id:"mini",name:"소형 몰랑이",emo:"🐰",qty:90},{id:"book",name:"동화책",emo:"📖",qty:10}] };
+const ON=()=>!!(CFG.SUPABASE_URL&&CFG.SUPABASE_KEY);
+async function sb(path,method,body,extra){ const r=await fetch(CFG.SUPABASE_URL+"/rest/v1/"+path,{method:method||"GET",headers:{apikey:CFG.SUPABASE_KEY,Authorization:"Bearer "+CFG.SUPABASE_KEY,"Content-Type":"application/json",Prefer:"return=representation",...(extra||{})},body:body?JSON.stringify(body):undefined}); if(!r.ok) throw new Error(r.status); return r.json().catch(()=>null); }
+function fnv(s){ let h=2166136261; for(const c of s){ h^=c.charCodeAt(0); h=Math.imul(h,16777619)>>>0; } return h; }
+function otpFor(slot){ const d=new Date(); const day=d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate(); return String(fnv(CFG.OTP_SECRET+"|"+day+"|"+slot)%10000).padStart(4,"0"); }
+function tick(){ const ms=CFG.OTP_SLOT_MIN*60000, s=Math.floor(Date.now()/ms); otp.textContent=otpFor(s); document.getElementById("otp-n").textContent=otpFor(s+1); document.getElementById("otp-p").textContent=otpFor(s-1); document.getElementById("otp-left").textContent=Math.ceil(((s+1)*ms-Date.now())/60000); }
+function unlock(){ if(document.getElementById("pin").value!==CFG.STAFF_PIN){ alert("PIN이 맞지 않아요"); return; } gate.style.display="none"; main.style.display="block"; tick(); setInterval(tick,15000); load(); }
+document.getElementById("pin").addEventListener("keydown",e=>{ if(e.key==="Enter") unlock(); });
+
+let stock=[], draws=[], svs=[];
+async function load(){
+  document.getElementById("mode").innerHTML = ON() ? '<span class="ok">● Supabase 연결 — 모든 기기 공통 재고·설문</span>' : '<span class="bad">● 로컬 모드 — 이 기기(브라우저)의 기록만 보임. 재고는 아이 휴대폰마다 따로 줄어듭니다. 실제 운영은 Supabase 연결 권장 (README)</span>';
+  if(ON()){ try{ stock=await sb("bt_prizes?order=sort"); draws=await sb("bt_draws?order=created_at.desc&limit=2000"); svs=await sb("bt_survey?order=created_at.desc&limit=5000"); }catch(e){ alert("불러오기 실패: "+e.message); } }
+  else { try{ stock=JSON.parse(localStorage.getItem("bt_stock")||"null")||CFG.PRIZES.map(p=>({...p})); draws=(JSON.parse(localStorage.getItem("bt_draws")||"[]")).map(d=>({created_at:new Date(d.at).toISOString(), tnum:d.tnum, prize:d.prize, claimed_at:null})); const s=JSON.parse(localStorage.getItem("bt_state_v1")||"null"); svs=s&&s.survey?[s.survey]:[]; }catch(e){} }
+  render();
+}
+function render(){
+  const cnt={}; draws.forEach(d=>cnt[d.prize]=(cnt[d.prize]||0)+1);
+  const tot=stock.reduce((a,p)=>a+(+p.qty||0),0);
+  kpi.innerHTML=`<div><b>${tot}</b>남은 경품</div><div><b>${draws.length}</b>뽑기 횟수</div><div><b>${draws.filter(d=>d.claimed_at).length}</b>수령 처리</div><div><b>${svs.length}</b>설문 응답</div>`;
+  document.getElementById("stock").innerHTML=stock.map((p,i)=>{ const used=cnt[p.id]||0, init=used+(+p.qty||0); return `<tr><td>${p.emo||""} <input type="text" value="${p.name}" data-i="${i}" data-k="name" style="width:70%; display:inline-block"></td><td><input type="number" min="0" value="${p.qty}" data-i="${i}" data-k="qty"></td><td>${used}</td><td><div class="bar"><i style="width:${init?Math.round(used/init*100):0}%"></i></div><span class="small">${init?Math.round(used/init*100):0}% 소진</span></td></tr>`; }).join("");
+  document.getElementById("draw-sum").textContent = Object.entries(cnt).map(([k,v])=>`${(stock.find(p=>p.id===k)||{}).name||k} ${v}`).join(" · ")||"아직 없음";
+  document.getElementById("draws").innerHTML=draws.slice(0,300).map(d=>`<tr><td>${hm(d.created_at)}</td><td>${d.tnum||""}</td><td>${(stock.find(p=>p.id===d.prize)||{}).name||d.prize}</td><td>${d.claimed_at?'<span class="ok">✓</span>':''}</td></tr>`).join("");
+  document.getElementById("sv-sum").textContent=`평균 별점 ${svs.length?(svs.reduce((a,s)=>a+(+s.q1||0),0)/svs.length).toFixed(2):"-"} · 관광정보 수신 동의 ${svs.filter(s=>s.marketing).length}명`;
+  document.getElementById("sv").innerHTML=svs.slice(0,500).map(s=>`<tr><td>${hm(s.created_at)}</td><td>${s.name}</td><td>${s.region}</td><td>${s.phone}</td><td>${s.marketing?"✓":""}</td><td>${s.q1}</td><td>${s.q2||""}</td><td>${s.q4||""}</td></tr>`).join("");
+}
+function hm(t){ const d=new Date(t); return isNaN(d)?"":`${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2,"0")}`; }
+async function saveStock(){ document.querySelectorAll("#stock input").forEach(el=>{ stock[+el.dataset.i][el.dataset.k]= el.dataset.k==="qty" ? Math.max(0,parseInt(el.value||"0")) : el.value; });
+  if(ON()){ try{ for(const [i,p] of stock.entries()){ await sb("bt_prizes","POST",{id:p.id,name:p.name,emo:p.emo||"",qty:p.qty,sort:i},{Prefer:"resolution=merge-duplicates,return=minimal"}); } alert("저장됨 (모든 기기 반영)"); }catch(e){ alert("저장 실패: "+e.message); } }
+  else { localStorage.setItem("bt_stock",JSON.stringify(stock)); alert("이 기기에 저장됨 (로컬 모드)"); }
+  load(); }
+function addPrize(){ const name=prompt("경품 이름"); if(!name) return; const qty=parseInt(prompt("수량","0")||"0"); stock.push({id:"p"+Date.now().toString(36), name, emo:"🎁", qty}); render(); }
+function csv(){ const cols=["created_at","tnum","code","name","region","phone","marketing","privacy","q1","q2","q3","q4","q5","done"]; const esc=v=>'"'+String(v??"").replace(/"/g,'""')+'"'; const txt="﻿"+cols.join(",")+"\n"+svs.map(s=>cols.map(c=>esc(s[c])).join(",")).join("\n"); const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([txt],{type:"text/csv"})); a.download=`설문응답_${new Date().toISOString().slice(0,10)}.csv`; a.click(); }
+</script></div></body></html>

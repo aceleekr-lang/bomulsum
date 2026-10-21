@@ -16,7 +16,7 @@ input{font-size:20px; padding:10px 14px; border-radius:10px; border:0; text-alig
 <div class="box" id="gate">
   <h1>운영요원 전용</h1>
   <p class="sub">PIN을 입력하세요</p>
-  <input id="pin" inputmode="numeric" maxlength="4" autofocus><br><br>
+  <input id="pin" inputmode="numeric" maxlength="8" autofocus><br><br>
   <button onclick="unlock()" style="font-size:18px; padding:10px 24px; border-radius:10px; border:0; background:#FFC63D">열기</button>
 </div>
 <div class="box" id="main" style="display:none">
@@ -27,7 +27,7 @@ input{font-size:20px; padding:10px 14px; border-radius:10px; border:0; text-alig
   <p class="lock">경품수령소 수령 처리 PIN은 앱 설정과 동일 · 이 페이지 주소는 외부에 공개하지 마세요</p>
 </div>
 <script>
-const OTP_SECRET="sunshine-2026-1024", SLOT_MIN=30, STAFF_PIN="2410"; // index.html CONFIG와 동일하게
+const OTP_SECRET="sunshine-2026-1024", SLOT_MIN=30, STAFF_PIN="20240520"; // index.html CONFIG와 동일하게
 function fnv(s){ let h=2166136261; for(const c of s){ h^=c.charCodeAt(0); h=Math.imul(h,16777619)>>>0; } return h; }
 function otpFor(slot){ const d=new Date(); const day=d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate(); return String(fnv(OTP_SECRET+"|"+day+"|"+slot)%10000).padStart(4,"0"); }
 function tick(){ const ms=SLOT_MIN*60000; const s=Math.floor(Date.now()/ms); document.getElementById("cur").textContent=otpFor(s); document.getElementById("nxt").textContent=otpFor(s+1); document.getElementById("prv").textContent=otpFor(s-1);
