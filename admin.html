@@ -18,6 +18,10 @@ input[type=number],input[type=text],input[type=password]{min-height:40px; paddin
 .small{font-size:13px; color:var(--muted)} .ok{color:var(--leaf); font-weight:700} .bad{color:var(--coral); font-weight:700}
 .otp{font-family:"Jua",sans-serif; font-size:48px; letter-spacing:.12em}
 .bar{height:10px; background:var(--line); border-radius:5px; overflow:hidden} .bar i{display:block; height:100%; background:var(--leaf)}
+.stat2{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:14px; margin-top:12px}
+.stat2 h3{font-family:"Jua",sans-serif; font-weight:400; font-size:16px; margin:0 0 6px}
+.hb{display:grid; grid-template-columns:110px 1fr 56px; gap:8px; align-items:center; font-size:14px; margin:4px 0}
+.hb .bar i{background:var(--sky)} .hb b{text-align:right}
 </style></head><body><div class="wrap">
 <div id="gate" class="card" style="max-width:380px; margin:40px auto"><h1>관리자</h1><p class="small">운영요원 PIN</p><input type="password" id="pin" inputmode="numeric" maxlength="8"><button class="btn" style="margin-top:10px; width:100%" onclick="unlock()">열기</button></div>
 
@@ -30,12 +34,25 @@ input[type=number],input[type=text],input[type=password]{min-height:40px; paddin
   <div class="card"><h2>경품 재고</h2>
     <div class="kpi" id="kpi"></div>
     <table style="margin-top:10px"><thead><tr><th>경품</th><th style="width:110px">남은 수량</th><th style="width:90px">뽑힘</th><th style="width:40%">진행</th></tr></thead><tbody id="stock"></tbody></table>
-    <div class="row" style="margin-top:10px"><button class="btn" onclick="saveStock()">수량 저장</button><button class="btn ghost" onclick="addPrize()">+ 경품 추가</button><button class="btn ghost" onclick="load()">새로고침</button></div>
+    <div class="row" style="margin-top:10px"><button class="btn" onclick="saveStock()">수량 저장</button><button class="btn ghost" onclick="addPrize()">+ 경품 추가</button><button class="btn ghost" onclick="load()">새로고침</button><button class="btn coral" onclick="resetAll()">🧹 테스트 데이터 전체 초기화</button></div>
+    <p class="small">초기화 = 뽑기 기록·설문 응답 전부 삭제 + 경품 수량을 기본값(씨앗 연필 500 · 만두 몰랑이 200 · 소형 몰랑이 90 · 동화책 10)으로 복원. 행사 시작 직전에 한 번만 누르세요.</p>
     <p class="small" style="margin-top:8px">확률은 남은 수량에 비례합니다. 수량을 0으로 두면 더 이상 나오지 않아요. 동화책은 S3 동화 만들기 참여자에게 별도로 주려면 수량을 0으로 두고 경품수령소에서 직접 지급하세요.</p>
   </div>
 
   <div class="card"><h2>뽑기 기록</h2><p class="small" id="draw-sum"></p><div style="max-height:260px; overflow:auto"><table><thead><tr><th>시각</th><th>탐험대원</th><th>경품</th><th>수령</th></tr></thead><tbody id="draws"></tbody></table></div></div>
 
+  <div class="card"><h2>설문 통계</h2>
+    <div class="kpi" id="sv-kpi"></div>
+    <div class="stat2">
+      <div><h3>⭐ 별점 분포</h3><div id="st-q1"></div></div>
+      <div><h3>🏆 가장 좋았던 스테이션</h3><div id="st-q2"></div></div>
+      <div><h3>📣 알게 된 경로</h3><div id="st-q3"></div></div>
+      <div><h3>🔁 재방문 의향</h3><div id="st-q4"></div></div>
+      <div><h3>📍 지역</h3><div id="st-region"></div></div>
+      <div><h3>🕒 시간대별 설문 수</h3><div id="st-hour"></div></div>
+    </div>
+    <h3 style="margin-top:14px">💬 자유 의견</h3><div id="st-q5" class="small" style="max-height:200px; overflow:auto"></div>
+  </div>
   <div class="card"><h2>설문 응답</h2><p class="small" id="sv-sum"></p>
     <div class="row"><button class="btn sky" onclick="csv()">CSV 내려받기</button><span class="small">이름·지역·전화·수신동의·문항 전체</span></div>
     <div style="max-height:320px; overflow:auto; margin-top:10px"><table><thead><tr><th>시각</th><th>이름</th><th>지역</th><th>전화</th><th>수신</th><th>별점</th><th>최고 스테이션</th><th>재방문</th></tr></thead><tbody id="sv"></tbody></table></div>
@@ -68,14 +85,44 @@ function render(){
   document.getElementById("stock").innerHTML=stock.map((p,i)=>{ const used=cnt[p.id]||0, init=used+(+p.qty||0); return `<tr><td>${p.emo||""} <input type="text" value="${p.name}" data-i="${i}" data-k="name" style="width:70%; display:inline-block"></td><td><input type="number" min="0" value="${p.qty}" data-i="${i}" data-k="qty"></td><td>${used}</td><td><div class="bar"><i style="width:${init?Math.round(used/init*100):0}%"></i></div><span class="small">${init?Math.round(used/init*100):0}% 소진</span></td></tr>`; }).join("");
   document.getElementById("draw-sum").textContent = Object.entries(cnt).map(([k,v])=>`${(stock.find(p=>p.id===k)||{}).name||k} ${v}`).join(" · ")||"아직 없음";
   document.getElementById("draws").innerHTML=draws.slice(0,300).map(d=>`<tr><td>${hm(d.created_at)}</td><td>${d.tnum||""}</td><td>${(stock.find(p=>p.id===d.prize)||{}).name||d.prize}</td><td>${d.claimed_at?'<span class="ok">✓</span>':''}</td></tr>`).join("");
+  renderStats();
   document.getElementById("sv-sum").textContent=`평균 별점 ${svs.length?(svs.reduce((a,s)=>a+(+s.q1||0),0)/svs.length).toFixed(2):"-"} · 관광정보 수신 동의 ${svs.filter(s=>s.marketing).length}명`;
   document.getElementById("sv").innerHTML=svs.slice(0,500).map(s=>`<tr><td>${hm(s.created_at)}</td><td>${s.name}</td><td>${s.region}</td><td>${s.phone}</td><td>${s.marketing?"✓":""}</td><td>${s.q1}</td><td>${s.q2||""}</td><td>${s.q4||""}</td></tr>`).join("");
+}
+function hbar(id, pairs, total){ const el=document.getElementById(id); if(!pairs.length){ el.innerHTML='<p class="small">아직 없음</p>'; return; } const mx=Math.max(...pairs.map(p=>p[1]),1);
+  el.innerHTML=pairs.map(([k,v])=>`<div class="hb"><span>${k}</span><div class="bar"><i style="width:${Math.round(v/mx*100)}%"></i></div><b>${v}${total?` <span class="small">(${Math.round(v/total*100)}%)</span>`:""}</b></div>`).join(""); }
+function count(arr){ const m={}; arr.forEach(x=>{ if(x==null||x==="") return; m[x]=(m[x]||0)+1; }); return Object.entries(m).sort((a,b)=>b[1]-a[1]); }
+function renderStats(){
+  const n=svs.length; const avg=n?(svs.reduce((a,s)=>a+(+s.q1||0),0)/n):0;
+  const mkt=svs.filter(s=>s.marketing).length; const revisit=svs.filter(s=>s.q4==="꼭 올래요").length;
+  document.getElementById("sv-kpi").innerHTML=`<div><b>${n}</b>응답 수</div><div><b>${n?avg.toFixed(2):"-"}</b>평균 별점</div><div><b>${n?Math.round(revisit/n*100):0}%</b>"꼭 올래요"</div><div><b>${mkt}</b>관광정보 수신 동의</div>`;
+  hbar("st-q1", [5,4,3,2,1].map(k=>["⭐".repeat(k), svs.filter(s=>+s.q1===k).length]), n);
+  hbar("st-q2", count(svs.map(s=>s.q2)), n);
+  const q3=[]; svs.forEach(s=>String(s.q3||"").split(",").forEach(x=>{ if(x.trim()) q3.push(x.trim()); })); hbar("st-q3", count(q3), n);
+  hbar("st-q4", count(svs.map(s=>s.q4)), n);
+  hbar("st-region", count(svs.map(s=>s.region)), n);
+  const hours={}; svs.forEach(s=>{ const d=new Date(s.created_at); if(!isNaN(d)){ const h=d.getHours()+"시"; hours[h]=(hours[h]||0)+1; } }); hbar("st-hour", Object.entries(hours).sort((a,b)=>parseInt(a[0])-parseInt(b[0])), 0);
+  const q5=svs.filter(s=>s.q5&&s.q5.trim()); document.getElementById("st-q5").innerHTML = q5.length ? q5.map(s=>`<div style="padding:6px 0; border-bottom:1px solid var(--line)">"${s.q5}" <span style="color:var(--muted)">— ${s.region||""} · ${hm(s.created_at)}</span></div>`).join("") : '<p>아직 없음</p>';
 }
 function hm(t){ const d=new Date(t); return isNaN(d)?"":`${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2,"0")}`; }
 async function saveStock(){ document.querySelectorAll("#stock input").forEach(el=>{ stock[+el.dataset.i][el.dataset.k]= el.dataset.k==="qty" ? Math.max(0,parseInt(el.value||"0")) : el.value; });
   if(ON()){ try{ for(const [i,p] of stock.entries()){ await sb("bt_prizes","POST",{id:p.id,name:p.name,emo:p.emo||"",qty:p.qty,sort:i},{Prefer:"resolution=merge-duplicates,return=minimal"}); } alert("저장됨 (모든 기기 반영)"); }catch(e){ alert("저장 실패: "+e.message); } }
   else { localStorage.setItem("bt_stock",JSON.stringify(stock)); alert("이 기기에 저장됨 (로컬 모드)"); }
   load(); }
+async function resetAll(){
+  if(!confirm("뽑기 기록·설문 응답을 모두 지우고 경품 수량을 기본값으로 되돌릴까요? 되돌릴 수 없어요.")) return;
+  if(prompt("확인을 위해 PIN을 다시 입력하세요")!==CFG.STAFF_PIN){ alert("PIN이 맞지 않아요"); return; }
+  if(ON()){
+    try{
+      await sb("bt_draws?id=gt.0","DELETE",null,{Prefer:"return=minimal"});
+      await sb("bt_survey?id=gt.0","DELETE",null,{Prefer:"return=minimal"});
+      for(const [i,p] of CFG.PRIZES.entries()) await sb("bt_prizes","POST",{id:p.id,name:p.name,emo:p.emo,qty:p.qty,sort:i},{Prefer:"resolution=merge-duplicates,return=minimal"});
+      await sb("bt_prizes?id=not.in.("+CFG.PRIZES.map(p=>'"'+p.id+'"').join(",")+")","DELETE",null,{Prefer:"return=minimal"});
+      alert("초기화 완료 (모든 기기 공통)");
+    }catch(e){ alert("초기화 실패: "+e.message+"\n→ supabase.sql의 delete 정책(아래 2줄)을 실행했는지 확인하세요"); }
+  } else { ["bt_stock","bt_draws","bt_state_v1","bt_drawn_v1","bt_queue"].forEach(k=>localStorage.removeItem(k)); alert("이 기기의 기록을 지웠어요 (로컬 모드)"); }
+  load();
+}
 function addPrize(){ const name=prompt("경품 이름"); if(!name) return; const qty=parseInt(prompt("수량","0")||"0"); stock.push({id:"p"+Date.now().toString(36), name, emo:"🎁", qty}); render(); }
 function csv(){ const cols=["created_at","tnum","code","name","region","phone","marketing","privacy","q1","q2","q3","q4","q5","done"]; const esc=v=>'"'+String(v??"").replace(/"/g,'""')+'"'; const txt="﻿"+cols.join(",")+"\n"+svs.map(s=>cols.map(c=>esc(s[c])).join(",")).join("\n"); const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([txt],{type:"text/csv"})); a.download=`설문응답_${new Date().toISOString().slice(0,10)}.csv`; a.click(); }
 </script></div></body></html>
