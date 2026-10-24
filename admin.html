@@ -1,128 +1,424 @@
-<!doctype html>
-<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>관리자 — 보물섬 미션투어</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;700&display=swap">
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>밀양인더스트립 · 관리자</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="config.js"></script>
 <style>
-:root{--bg:#FFFBF1; --fg:#1C2A3A; --muted:#5B6878; --card:#fff; --line:#EADFC6; --soft:#FFF3CF; --sky:#2A6FD1; --sun:#FFC63D; --coral:#D9453A; --leaf:#2E8B57}
-*{box-sizing:border-box} body{margin:0; background:var(--bg); color:var(--fg); font-family:"Noto Sans KR",sans-serif; font-size:16px}
-.wrap{max-width:860px; margin:0 auto; padding:16px}
-h1,h2{font-family:"Jua",sans-serif; font-weight:400; margin:0} h1{font-size:26px} h2{font-size:20px; margin-bottom:8px}
-.card{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:16px; margin-top:14px; box-shadow:0 6px 20px rgba(60,40,0,.06)}
-table{width:100%; border-collapse:collapse; font-size:15px} th,td{padding:8px 6px; border-bottom:1px solid var(--line); text-align:left; vertical-align:middle} th{background:var(--soft); font-size:13px}
-input[type=number],input[type=text],input[type=password]{min-height:40px; padding:0 10px; border-radius:10px; border:2px solid var(--line); font-size:16px; width:100%}
-.btn{min-height:44px; padding:0 16px; border-radius:12px; border:0; font-family:"Jua",sans-serif; font-size:17px; cursor:pointer; background:var(--sun); color:#3A2A00}
-.btn.sky{background:var(--sky); color:#fff} .btn.ghost{background:transparent; border:2px solid var(--line); color:var(--fg)} .btn.coral{background:var(--coral); color:#fff}
-.row{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
-.kpi{display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px}
-.kpi div{background:var(--soft); border-radius:12px; padding:12px; text-align:center} .kpi b{display:block; font-family:"Jua",sans-serif; font-size:28px; color:var(--coral)}
-.small{font-size:13px; color:var(--muted)} .ok{color:var(--leaf); font-weight:700} .bad{color:var(--coral); font-weight:700}
-.otp{font-family:"Jua",sans-serif; font-size:48px; letter-spacing:.12em}
-.bar{height:10px; background:var(--line); border-radius:5px; overflow:hidden} .bar i{display:block; height:100%; background:var(--leaf)}
-.stat2{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:14px; margin-top:12px}
-.stat2 h3{font-family:"Jua",sans-serif; font-weight:400; font-size:16px; margin:0 0 6px}
-.hb{display:grid; grid-template-columns:110px 1fr 56px; gap:8px; align-items:center; font-size:14px; margin:4px 0}
-.hb .bar i{background:var(--sky)} .hb b{text-align:right}
-</style></head><body><div class="wrap">
-<div id="gate" class="card" style="max-width:380px; margin:40px auto"><h1>관리자</h1><p class="small">운영요원 PIN</p><input type="password" id="pin" inputmode="numeric" maxlength="8"><button class="btn" style="margin-top:10px; width:100%" onclick="unlock()">열기</button></div>
+:root{--bg:#F7F8F5;--ink:#22322B;--sub:#5C6B63;--pine:#2F6B52;--pine-soft:#E3EFE7;
+  --coral:#D96C4A;--coral-soft:#FBEDE7;--line:#E1E6E1;--danger:#C24B32}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Pretendard,-apple-system,sans-serif;background:var(--bg);color:var(--ink);font-size:15px}
+.wrap{max-width:1080px;margin:0 auto;padding:24px 16px 80px}
+h1{font-size:20px;margin-bottom:4px}
+h1 small{font-weight:400;color:var(--sub);font-size:13px}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;margin:14px 0}
+input,select{padding:10px 12px;border:1.5px solid var(--line);border-radius:8px;font:inherit;font-size:14px}
+input:focus,select:focus{outline:none;border-color:var(--pine)}
+button{padding:10px 16px;border:none;border-radius:8px;font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+.bp{background:var(--pine);color:#fff}.bg{background:var(--pine-soft);color:var(--pine)}
+.bl{background:#fff;border:1.5px solid var(--line)}.bd{background:var(--coral-soft);color:var(--danger)}
+.stats{display:flex;gap:10px;flex-wrap:wrap}
+.stat{flex:1;min-width:110px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px;cursor:pointer}
+.stat.on{border-color:var(--pine);background:var(--pine-soft)}
+.stat b{font-size:22px;display:block}.stat span{font-size:12.5px;color:var(--sub)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;color:var(--sub);font-weight:600;font-size:12.5px;padding:8px;border-bottom:2px solid var(--line)}
+td{padding:10px 8px;border-bottom:1px solid var(--line)}
+tr.row{cursor:pointer}tr.row:hover{background:var(--pine-soft)}
+.badge{display:inline-block;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:700}
+.b-drafting{background:#EEF1EE;color:var(--sub)}.b-submitted{background:#E4EDFB;color:#2C5AA0}
+.b-approved{background:var(--pine-soft);color:var(--pine)}.b-rejected{background:var(--coral-soft);color:var(--danger)}
+.b-joined{background:#F3F0E8;color:#8A7B4F}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.toolbar input{flex:1;min-width:180px}
+.modal{position:fixed;inset:0;background:rgba(24,32,28,.55);display:none;z-index:50;align-items:center;justify-content:center;padding:16px}
+.modal.on{display:flex}
+.sheet{background:#fff;border-radius:14px;width:100%;max-width:760px;max-height:92vh;overflow-y:auto;padding:22px}
+.sheet h3{font-size:18px;margin-bottom:2px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:10px 0}
+.thumb{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#F2F4F1}
+.thumb img{width:100%;aspect-ratio:3/4;object-fit:cover;display:block;cursor:zoom-in}
+.thumb figcaption{font-size:11.5px;color:var(--sub);padding:5px 7px}
+.acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.setrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+.setrow label{width:170px;font-size:13.5px;color:var(--sub);font-weight:600}
+.login{max-width:380px;margin:12vh auto 0}
+.muted{color:var(--sub);font-size:13px}
+.err{color:var(--danger);font-size:13.5px;margin-top:8px;display:none}.err.on{display:block}
+#viewer{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;z-index:99;align-items:center;justify-content:center;cursor:zoom-out}
+#viewer.on{display:flex}#viewer img{max-width:96vw;max-height:96vh}
+.reject-box{width:100%;margin-top:8px;display:none}
+.reject-box.on{display:block}
+.reject-box textarea{width:100%;height:70px;padding:10px;border:1.5px solid var(--line);border-radius:8px;font:inherit}
+</style>
+</head>
+<body>
+<div class="wrap">
 
-<div id="main" style="display:none">
-  <h1>🏴‍☠️ 보물섬 미션투어 관리자</h1>
-  <p class="small" id="mode"></p>
-
-  <div class="card"><h2>지금 입장번호</h2><div class="row"><div class="otp" id="otp">----</div><div class="small">다음 <b id="otp-n"></b> · 직전 <b id="otp-p"></b> · <span id="otp-left"></span>분 후 변경</div></div></div>
-
-  <div class="card"><h2>경품 재고</h2>
-    <div class="kpi" id="kpi"></div>
-    <table style="margin-top:10px"><thead><tr><th>경품</th><th style="width:110px">남은 수량</th><th style="width:90px">뽑힘</th><th style="width:40%">진행</th></tr></thead><tbody id="stock"></tbody></table>
-    <div class="row" style="margin-top:10px"><button class="btn" onclick="saveStock()">수량 저장</button><button class="btn ghost" onclick="addPrize()">+ 경품 추가</button><button class="btn ghost" onclick="load()">새로고침</button><button class="btn coral" onclick="resetAll()">🧹 테스트 데이터 전체 초기화</button></div>
-    <p class="small">초기화 = 뽑기 기록·설문 응답 전부 삭제 + 경품 수량을 기본값(씨앗 연필 500 · 만두 몰랑이 200 · 소형 몰랑이 90 · 동화책 10)으로 복원. 행사 시작 직전에 한 번만 누르세요.</p>
-    <p class="small" style="margin-top:8px">확률은 남은 수량에 비례합니다. 수량을 0으로 두면 더 이상 나오지 않아요. 동화책은 S3 동화 만들기 참여자에게 별도로 주려면 수량을 0으로 두고 경품수령소에서 직접 지급하세요.</p>
-  </div>
-
-  <div class="card"><h2>뽑기 기록</h2><p class="small" id="draw-sum"></p><div style="max-height:260px; overflow:auto"><table><thead><tr><th>시각</th><th>탐험대원</th><th>경품</th><th>수령</th></tr></thead><tbody id="draws"></tbody></table></div></div>
-
-  <div class="card"><h2>설문 통계</h2>
-    <div class="kpi" id="sv-kpi"></div>
-    <div class="stat2">
-      <div><h3>⭐ 별점 분포</h3><div id="st-q1"></div></div>
-      <div><h3>🏆 가장 좋았던 스테이션</h3><div id="st-q2"></div></div>
-      <div><h3>📣 알게 된 경로</h3><div id="st-q3"></div></div>
-      <div><h3>🔁 재방문 의향</h3><div id="st-q4"></div></div>
-      <div><h3>📍 지역</h3><div id="st-region"></div></div>
-      <div><h3>🕒 시간대별 설문 수</h3><div id="st-hour"></div></div>
+<!-- 로그인 -->
+<div id="v-login" class="login">
+  <div class="card">
+    <h1>관리자 로그인 <small>밀양인더스트립</small></h1>
+    <div style="margin-top:14px">
+      <input id="lg-code" type="password" placeholder="마스터 코드" style="width:100%" onkeydown="if(event.key==='Enter')adminLogin()">
+      <p class="err" id="lg-err"></p>
+      <button class="bp" style="width:100%;margin-top:10px" onclick="adminLogin()">로그인</button>
     </div>
-    <h3 style="margin-top:14px">💬 자유 의견</h3><div id="st-q5" class="small" style="max-height:200px; overflow:auto"></div>
-  </div>
-  <div class="card"><h2>설문 응답</h2><p class="small" id="sv-sum"></p>
-    <div class="row"><button class="btn sky" onclick="csv()">CSV 내려받기</button><span class="small">이름·지역·전화·수신동의·문항 전체</span></div>
-    <div style="max-height:320px; overflow:auto; margin-top:10px"><table><thead><tr><th>시각</th><th>이름</th><th>지역</th><th>전화</th><th>수신</th><th>별점</th><th>최고 스테이션</th><th>재방문</th></tr></thead><tbody id="sv"></tbody></table></div>
   </div>
 </div>
 
-<script>
-/* index.html CONFIG와 동일하게 */
-const CFG={ OTP_SECRET:"sunshine-2026-1024", OTP_SLOT_MIN:30, STAFF_PIN:"20240520", SUPABASE_URL:"https://snaldhxucwsaifqrccih.supabase.co", SUPABASE_KEY:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNuYWxkaHh1Y3dzYWlmcXJjY2loIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyNzIwNjAsImV4cCI6MjEwMzg0ODA2MH0.TUdhun_cBHsool0e2FZOOfznjFoC_u5B0MJCl1dTDhI",
-  PRIZES:[{id:"pen",name:"씨앗 연필",emo:"✏️",qty:500},{id:"mandu",name:"만두 몰랑이",emo:"🥟",qty:200},{id:"mini",name:"소형 몰랑이",emo:"🐰",qty:90},{id:"book",name:"동화책",emo:"📖",qty:10}] };
-const ON=()=>!!(CFG.SUPABASE_URL&&CFG.SUPABASE_KEY);
-async function sb(path,method,body,extra){ const r=await fetch(CFG.SUPABASE_URL+"/rest/v1/"+path,{method:method||"GET",headers:{apikey:CFG.SUPABASE_KEY,Authorization:"Bearer "+CFG.SUPABASE_KEY,"Content-Type":"application/json",Prefer:"return=representation",...(extra||{})},body:body?JSON.stringify(body):undefined}); if(!r.ok) throw new Error(r.status); return r.json().catch(()=>null); }
-function fnv(s){ let h=2166136261; for(const c of s){ h^=c.charCodeAt(0); h=Math.imul(h,16777619)>>>0; } return h; }
-function otpFor(slot){ const d=new Date(); const day=d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate(); return String(fnv(CFG.OTP_SECRET+"|"+day+"|"+slot)%10000).padStart(4,"0"); }
-function tick(){ const ms=CFG.OTP_SLOT_MIN*60000, s=Math.floor(Date.now()/ms); otp.textContent=otpFor(s); document.getElementById("otp-n").textContent=otpFor(s+1); document.getElementById("otp-p").textContent=otpFor(s-1); document.getElementById("otp-left").textContent=Math.ceil(((s+1)*ms-Date.now())/60000); }
-function unlock(){ if(document.getElementById("pin").value!==CFG.STAFF_PIN){ alert("PIN이 맞지 않아요"); return; } gate.style.display="none"; main.style.display="block"; tick(); setInterval(tick,15000); load(); }
-document.getElementById("pin").addEventListener("keydown",e=>{ if(e.key==="Enter") unlock(); });
+<!-- 대시보드 -->
+<div id="v-dash" style="display:none">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+    <h1>밀양인더스트립 관리자 <small id="today"></small></h1>
+    <div style="display:flex;gap:8px">
+      <button class="bg" onclick="exportExcel()">📊 엑셀 다운로드</button>
+      <button class="bg" onclick="exportZip()">🖼 이미지 ZIP</button>
+      <button class="bl" onclick="adminLogout()">로그아웃</button>
+    </div>
+  </div>
 
-let stock=[], draws=[], svs=[];
-async function load(){
-  document.getElementById("mode").innerHTML = ON() ? '<span class="ok">● Supabase 연결 — 모든 기기 공통 재고·설문</span>' : '<span class="bad">● 로컬 모드 — 이 기기(브라우저)의 기록만 보임. 재고는 아이 휴대폰마다 따로 줄어듭니다. 실제 운영은 Supabase 연결 권장 (README)</span>';
-  if(ON()){ try{ stock=await sb("bt_prizes?order=sort"); draws=await sb("bt_draws?order=created_at.desc&limit=2000"); svs=await sb("bt_survey?order=created_at.desc&limit=5000"); }catch(e){ alert("불러오기 실패: "+e.message); } }
-  else { try{ stock=JSON.parse(localStorage.getItem("bt_stock")||"null")||CFG.PRIZES.map(p=>({...p})); draws=(JSON.parse(localStorage.getItem("bt_draws")||"[]")).map(d=>({created_at:new Date(d.at).toISOString(), tnum:d.tnum, prize:d.prize, claimed_at:null})); const s=JSON.parse(localStorage.getItem("bt_state_v1")||"null"); svs=s&&s.survey?[s.survey]:[]; }catch(e){} }
-  render();
+  <div class="stats" id="stats"></div>
+
+  <div class="card">
+    <b style="font-size:15px">운영 설정</b>
+    <div style="margin-top:12px">
+      <div class="setrow"><label>최초 제출 마감</label><input type="date" id="st-dl1"></div>
+      <div class="setrow"><label>재제출 마감 (반려자)</label><input type="date" id="st-dl2"></div>
+      <div class="setrow"><label>접수 상태</label>
+        <select id="st-open"><option value="true">접수 중</option><option value="false">접수 마감 (전체 차단)</option></select>
+        <button class="bp" onclick="saveSettings()">설정 저장</button></div>
+      <p class="muted">개별 참가자 기간 연장은 참가자를 클릭해서 설정하세요.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="toolbar">
+      <input id="q" placeholder="성함·소속·연락처 검색" oninput="renderTable()">
+      <button class="bl" onclick="loadAll()">↻ 새로고침</button>
+    </div>
+    <table>
+      <thead><tr><th style="width:34px"><input type="checkbox" id="sel-all" onchange="toggleAll(this.checked)"></th><th>상태</th><th>대표</th><th>팀인원</th><th>소속</th><th>연락처</th><th>방문지</th><th>제출일시</th></tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <p class="muted" id="count" style="margin-top:10px"></p>
+  </div>
+</div>
+</div>
+
+<!-- 상세 모달 -->
+<div class="modal" id="m-detail"><div class="sheet" id="detail-body"></div></div>
+<div id="viewer" onclick="this.classList.remove('on')"><img id="viewer-img"></div>
+
+<script>
+const C = window.MIRYANG_CONFIG;
+const sb = supabase.createClient(C.SUPABASE_URL, C.SUPABASE_ANON_KEY);
+const ADMIN_EMAIL = 'admin@gagok.local';   // 관리자 계정 이메일 (Authentication에 만든 것)
+let PARTS = [], VISITS = [], FILTER = null, CUR = null;
+const ST_LABEL = {joined:'가입만', drafting:'작성 중', submitted:'제출됨', approved:'승인', rejected:'반려'};
+
+// ---------- 인증 ----------
+async function adminLogin(){
+  const err = document.getElementById('lg-err'); err.classList.remove('on');
+  const code = document.getElementById('lg-code').value;
+  const {error} = await sb.auth.signInWithPassword({email: ADMIN_EMAIL, password: code});
+  if(error){ err.textContent = '마스터 코드가 올바르지 않습니다.'; err.classList.add('on'); return; }
+  enter();
 }
-function render(){
-  const cnt={}; draws.forEach(d=>cnt[d.prize]=(cnt[d.prize]||0)+1);
-  const tot=stock.reduce((a,p)=>a+(+p.qty||0),0);
-  kpi.innerHTML=`<div><b>${tot}</b>남은 경품</div><div><b>${draws.length}</b>뽑기 횟수</div><div><b>${draws.filter(d=>d.claimed_at).length}</b>수령 처리</div><div><b>${svs.length}</b>설문 응답</div>`;
-  document.getElementById("stock").innerHTML=stock.map((p,i)=>{ const used=cnt[p.id]||0, init=used+(+p.qty||0); return `<tr><td>${p.emo||""} <input type="text" value="${p.name}" data-i="${i}" data-k="name" style="width:70%; display:inline-block"></td><td><input type="number" min="0" value="${p.qty}" data-i="${i}" data-k="qty"></td><td>${used}</td><td><div class="bar"><i style="width:${init?Math.round(used/init*100):0}%"></i></div><span class="small">${init?Math.round(used/init*100):0}% 소진</span></td></tr>`; }).join("");
-  document.getElementById("draw-sum").textContent = Object.entries(cnt).map(([k,v])=>`${(stock.find(p=>p.id===k)||{}).name||k} ${v}`).join(" · ")||"아직 없음";
-  document.getElementById("draws").innerHTML=draws.slice(0,300).map(d=>`<tr><td>${hm(d.created_at)}</td><td>${d.tnum||""}</td><td>${(stock.find(p=>p.id===d.prize)||{}).name||d.prize}</td><td>${d.claimed_at?'<span class="ok">✓</span>':''}</td></tr>`).join("");
-  renderStats();
-  document.getElementById("sv-sum").textContent=`평균 별점 ${svs.length?(svs.reduce((a,s)=>a+(+s.q1||0),0)/svs.length).toFixed(2):"-"} · 관광정보 수신 동의 ${svs.filter(s=>s.marketing).length}명`;
-  document.getElementById("sv").innerHTML=svs.slice(0,500).map(s=>`<tr><td>${hm(s.created_at)}</td><td>${s.name}</td><td>${s.region}</td><td>${s.phone}</td><td>${s.marketing?"✓":""}</td><td>${s.q1}</td><td>${s.q2||""}</td><td>${s.q4||""}</td></tr>`).join("");
+async function adminLogout(){ await sb.auth.signOut(); location.reload(); }
+async function enter(){
+  document.getElementById('v-login').style.display='none';
+  document.getElementById('v-dash').style.display='block';
+  document.getElementById('today').textContent = new Date().toLocaleDateString('ko-KR');
+  await loadSettings(); await loadAll();
 }
-function hbar(id, pairs, total){ const el=document.getElementById(id); if(!pairs.length){ el.innerHTML='<p class="small">아직 없음</p>'; return; } const mx=Math.max(...pairs.map(p=>p[1]),1);
-  el.innerHTML=pairs.map(([k,v])=>`<div class="hb"><span>${k}</span><div class="bar"><i style="width:${Math.round(v/mx*100)}%"></i></div><b>${v}${total?` <span class="small">(${Math.round(v/total*100)}%)</span>`:""}</b></div>`).join(""); }
-function count(arr){ const m={}; arr.forEach(x=>{ if(x==null||x==="") return; m[x]=(m[x]||0)+1; }); return Object.entries(m).sort((a,b)=>b[1]-a[1]); }
+
+// ---------- 데이터 ----------
+async function loadSettings(){
+  const {data} = await sb.from('app_settings').select('*');
+  (data||[]).forEach(r=>{
+    if(r.key==='submission_deadline') document.getElementById('st-dl1').value = r.value;
+    if(r.key==='resubmission_deadline') document.getElementById('st-dl2').value = r.value;
+    if(r.key==='service_open') document.getElementById('st-open').value = r.value;
+  });
+}
+async function saveSettings(){
+  const rows = [
+    {key:'submission_deadline', value: document.getElementById('st-dl1').value},
+    {key:'resubmission_deadline', value: document.getElementById('st-dl2').value},
+    {key:'service_open', value: document.getElementById('st-open').value},
+  ];
+  const {error} = await sb.from('app_settings').upsert(rows);
+  alert(error ? '저장 실패: '+error.message : '설정이 저장되었습니다.');
+}
+async function loadAll(){
+  const [p, v] = await Promise.all([
+    sb.from('participants').select('*').order('created_at',{ascending:false}),
+    sb.from('visits').select('*'),
+  ]);
+  if(p.error||v.error){
+    const e=(p.error||v.error);
+    alert('데이터를 불러오지 못했습니다.\n\n(오류: '+(e.message||e.code||JSON.stringify(e))+')\n\n이 메시지를 캡처해서 전달해 주세요.');
+    if(String(e.message||'').match(/JWT|token|expired|Invalid/i)){ adminLogout(); }
+    return;
+  }
+  PARTS = p.data||[]; VISITS = v.data||[];
+  renderStats(); renderTable();
+}
+function visitsOf(pid){ return VISITS.filter(x=>x.participant_id===pid); }
+function readyVisits(pid){ return visitsOf(pid).filter(x=>!String(x.merchant_name).startsWith('(업체 미선택')&&x.photo1_path&&x.photo2_path&&x.receipt1_path); }
+
+// ---------- 목록 ----------
 function renderStats(){
-  const n=svs.length; const avg=n?(svs.reduce((a,s)=>a+(+s.q1||0),0)/n):0;
-  const mkt=svs.filter(s=>s.marketing).length; const revisit=svs.filter(s=>s.q4==="꼭 올래요").length;
-  document.getElementById("sv-kpi").innerHTML=`<div><b>${n}</b>응답 수</div><div><b>${n?avg.toFixed(2):"-"}</b>평균 별점</div><div><b>${n?Math.round(revisit/n*100):0}%</b>"꼭 올래요"</div><div><b>${mkt}</b>관광정보 수신 동의</div>`;
-  hbar("st-q1", [5,4,3,2,1].map(k=>["⭐".repeat(k), svs.filter(s=>+s.q1===k).length]), n);
-  hbar("st-q2", count(svs.map(s=>s.q2)), n);
-  const q3=[]; svs.forEach(s=>String(s.q3||"").split(",").forEach(x=>{ if(x.trim()) q3.push(x.trim()); })); hbar("st-q3", count(q3), n);
-  hbar("st-q4", count(svs.map(s=>s.q4)), n);
-  hbar("st-region", count(svs.map(s=>s.region)), n);
-  const hours={}; svs.forEach(s=>{ const d=new Date(s.created_at); if(!isNaN(d)){ const h=d.getHours()+"시"; hours[h]=(hours[h]||0)+1; } }); hbar("st-hour", Object.entries(hours).sort((a,b)=>parseInt(a[0])-parseInt(b[0])), 0);
-  const q5=svs.filter(s=>s.q5&&s.q5.trim()); document.getElementById("st-q5").innerHTML = q5.length ? q5.map(s=>`<div style="padding:6px 0; border-bottom:1px solid var(--line)">"${s.q5}" <span style="color:var(--muted)">— ${s.region||""} · ${hm(s.created_at)}</span></div>`).join("") : '<p>아직 없음</p>';
+  const c = s => PARTS.filter(x=>x.status===s).length;
+  const items = [
+    [null,'전체',PARTS.length], ['submitted','제출됨',c('submitted')], ['approved','승인',c('approved')],
+    ['rejected','반려',c('rejected')], ['drafting','작성 중',c('drafting')+c('joined')],
+  ];
+  document.getElementById('stats').innerHTML = items.map(([k,l,n])=>
+    `<div class="stat ${FILTER===k?'on':''}" onclick="FILTER=${k===null?'null':`'${k}'`};renderStats();renderTable()"><b>${n}</b><span>${l}</span></div>`).join('');
 }
-function hm(t){ const d=new Date(t); return isNaN(d)?"":`${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2,"0")}`; }
-async function saveStock(){ document.querySelectorAll("#stock input").forEach(el=>{ stock[+el.dataset.i][el.dataset.k]= el.dataset.k==="qty" ? Math.max(0,parseInt(el.value||"0")) : el.value; });
-  if(ON()){ try{ for(const [i,p] of stock.entries()){ await sb("bt_prizes","POST",{id:p.id,name:p.name,emo:p.emo||"",qty:p.qty,sort:i},{Prefer:"resolution=merge-duplicates,return=minimal"}); } alert("저장됨 (모든 기기 반영)"); }catch(e){ alert("저장 실패: "+e.message); } }
-  else { localStorage.setItem("bt_stock",JSON.stringify(stock)); alert("이 기기에 저장됨 (로컬 모드)"); }
-  load(); }
-async function resetAll(){
-  if(!confirm("뽑기 기록·설문 응답을 모두 지우고 경품 수량을 기본값으로 되돌릴까요? 되돌릴 수 없어요.")) return;
-  if(prompt("확인을 위해 PIN을 다시 입력하세요")!==CFG.STAFF_PIN){ alert("PIN이 맞지 않아요"); return; }
-  if(ON()){
-    try{
-      await sb("bt_draws?id=gt.0","DELETE",null,{Prefer:"return=minimal"});
-      await sb("bt_survey?id=gt.0","DELETE",null,{Prefer:"return=minimal"});
-      for(const [i,p] of CFG.PRIZES.entries()) await sb("bt_prizes","POST",{id:p.id,name:p.name,emo:p.emo,qty:p.qty,sort:i},{Prefer:"resolution=merge-duplicates,return=minimal"});
-      await sb("bt_prizes?id=not.in.("+CFG.PRIZES.map(p=>'"'+p.id+'"').join(",")+")","DELETE",null,{Prefer:"return=minimal"});
-      alert("초기화 완료 (모든 기기 공통)");
-    }catch(e){ alert("초기화 실패: "+e.message+"\n→ supabase.sql의 delete 정책(아래 2줄)을 실행했는지 확인하세요"); }
-  } else { ["bt_stock","bt_draws","bt_state_v1","bt_drawn_v1","bt_queue"].forEach(k=>localStorage.removeItem(k)); alert("이 기기의 기록을 지웠어요 (로컬 모드)"); }
-  load();
+let SEL = new Set();
+function toggleSel(id, on, ev){ ev.stopPropagation(); on?SEL.add(id):SEL.delete(id); updateSelInfo(); }
+function toggleAll(on){
+  const q = document.getElementById('q').value.trim();
+  visibleRows().forEach(p=>on?SEL.add(p.id):SEL.delete(p.id));
+  renderTable();
 }
-function addPrize(){ const name=prompt("경품 이름"); if(!name) return; const qty=parseInt(prompt("수량","0")||"0"); stock.push({id:"p"+Date.now().toString(36), name, emo:"🎁", qty}); render(); }
-function csv(){ const cols=["created_at","tnum","code","name","region","phone","marketing","privacy","q1","q2","q3","q4","q5","done"]; const esc=v=>'"'+String(v??"").replace(/"/g,'""')+'"'; const txt="﻿"+cols.join(",")+"\n"+svs.map(s=>cols.map(c=>esc(s[c])).join(",")).join("\n"); const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([txt],{type:"text/csv"})); a.download=`설문응답_${new Date().toISOString().slice(0,10)}.csv`; a.click(); }
-</script></div></body></html>
+function visibleRows(){
+  const q = document.getElementById('q').value.trim();
+  return PARTS.filter(p=>{
+    if(FILTER==='drafting') { if(!['drafting','joined'].includes(p.status)) return false; }
+    else if(FILTER && p.status!==FILTER) return false;
+    if(q && !(p.name.includes(q)||p.org.includes(q)||p.phone.includes(q.replace(/\D/g,'')))) return false;
+    return true;
+  });
+}
+function updateSelInfo(){
+  document.getElementById('count').textContent = `${visibleRows().length}명 표시 중` + (SEL.size?` · ${SEL.size}명 선택됨 (다운로드는 선택 인원만 저장돼요)`:` · 선택 없음 (다운로드 시 전체 저장)`);
+}
+function renderTable(){
+  const rows = visibleRows();
+  document.getElementById('tbody').innerHTML = rows.map(p=>`
+    <tr class="row" onclick="openDetail('${p.id}')">
+      <td onclick="event.stopPropagation()"><input type="checkbox" ${SEL.has(p.id)?'checked':''} onchange="toggleSel('${p.id}',this.checked,event)"></td>
+      <td><span class="badge b-${p.status}">${ST_LABEL[p.status]||p.status}</span></td>
+      <td><b>${esc(p.name)}</b></td><td>${teamSize(p)}명</td><td>${esc(p.org)}</td><td>${fmtPhone(p.phone)}</td>
+      <td>${readyVisits(p.id).length} / ${visitsOf(p.id).length}곳</td>
+      <td class="muted">${p.submitted_at ? new Date(p.submitted_at).toLocaleString('ko-KR') : '-'}</td>
+    </tr>`).join('') || '<tr><td colspan="8" class="muted" style="padding:24px;text-align:center">해당하는 참가자가 없습니다.</td></tr>';
+  updateSelInfo();
+}
+function exportTargets(){
+  const t = SEL.size ? PARTS.filter(p=>SEL.has(p.id)) : PARTS;
+  return t;
+}
+
+// ---------- 상세 ----------
+async function openDetail(id){
+  CUR = PARTS.find(x=>x.id===id);
+  const vs = visitsOf(id);
+  const tm = CUR.team_members||[];
+  let html = `<h3>${esc(CUR.name)} 팀 (${teamSize(CUR)}명) <span class="badge b-${CUR.status}">${ST_LABEL[CUR.status]}</span></h3>
+    <p style="font-size:13.5px;margin-top:4px"><b>팀원:</b> 대표 ${esc(CUR.name)}${tm.length?' · '+tm.map(m=>`${esc(m.name)}(${esc(m.relation)})`).join(' · '):' (단독)'}
+    <span class="muted">— 사진 2장 모두 전원 얼굴 확인</span></p>
+    <p class="muted">${esc(CUR.org)} · ${fmtPhone(CUR.phone)} · 가입 ${new Date(CUR.created_at).toLocaleDateString('ko-KR')}
+    ${CUR.submitted_at?` · 제출 ${new Date(CUR.submitted_at).toLocaleString('ko-KR')}`:''}
+    ${CUR.deadline_override?` · <b style="color:var(--pine)">개별 마감 ${CUR.deadline_override}</b>`:''}</p>
+    ${CUR.reject_reason?`<p style="margin-top:6px;color:var(--danger);font-size:13.5px">반려 사유: ${esc(CUR.reject_reason)}</p>`:''}`;
+  const prf=(CUR.dtc_proofs||[]).filter(x=>x&&x.path);
+  html += `<div style="margin-top:14px"><b>📱 주민증 발급 인증 (${prf.length}/${teamSize(CUR)}명)</b>`;
+  if(prf.length){
+    html += `<div class="grid2">`;
+    for(const d of prf){
+      const url = await signed(d.path, 3600);
+      html += `<figure class="thumb"><img src="${url}" loading="lazy" onclick="zoom('${url}')"><figcaption>${esc(d.name)}(${esc(d.relation)})</figcaption></figure>`;
+    }
+    html += `</div>`;
+  } else { html += ` <span class="muted">— 미제출</span>`; }
+  html += `</div>`;
+  for(const [i,vi] of vs.entries()){
+    const picked = !String(vi.merchant_name).startsWith('(업체 미선택');
+    html += `<div style="margin-top:16px"><b>방문지 ${i+1} — ${picked?esc(vi.merchant_name):'(업체 미선택)'}</b>
+      <span class="muted">${esc(vi.merchant_category||'')} ${esc(vi.merchant_region||'')}</span><div class="grid2">`;
+    for(const [f,label] of [['photo1_path','얼굴 사진 1'],['photo2_path','얼굴 사진 2'],['receipt1_path','영수증'],['receipt2_path','영수증 2']]){
+      if(!vi[f]) continue;
+      const url = await signed(vi[f], 3600);
+      html += `<figure class="thumb"><img src="${url}" loading="lazy" onclick="zoom('${url}')"><figcaption>${label}</figcaption></figure>`;
+    }
+    html += `</div></div>`;
+  }
+  if(CUR.survey){
+    html += `<details style="margin-top:18px"><summary style="cursor:pointer;font-weight:700">📋 만족도 설문 응답 보기</summary>
+      <div style="font-size:13.5px;margin-top:10px;line-height:1.8">`+
+      SURVEY_COLS.map(([qid,label])=>`<div><b>${label}</b> — ${esc(svVal(CUR.survey[qid]))||'<span class="muted">무응답</span>'}</div>`).join('')+
+      `</div></details>`;
+  }
+  html += `<div class="acts">
+    <button class="bp" onclick="review('approved')">✓ 승인</button>
+    <button class="bd" onclick="toggleReject()">반려…</button>
+    <button class="bl" onclick="resetPin()">핀 초기화</button>
+    <button class="bl" onclick="extendDeadline()">기간 연장</button>
+    <button class="bl" style="color:var(--danger)" onclick="removeParticipant()">참가자 삭제</button>
+    <button class="bl" style="margin-left:auto" onclick="closeDetail()">닫기</button>
+  </div>
+  <div class="reject-box" id="reject-box">
+    <textarea id="reject-reason" placeholder="반려 사유 — 사용자 화면에 그대로 표시됩니다. 예) 방문지 2의 영수증에서 날짜가 보이지 않습니다. 날짜·상호가 보이게 다시 촬영해 주세요."></textarea>
+    <button class="bd" style="margin-top:6px" onclick="review('rejected')">반려 확정</button>
+  </div>`;
+  document.getElementById('detail-body').innerHTML = html;
+  document.getElementById('m-detail').classList.add('on');
+}
+function closeDetail(){ document.getElementById('m-detail').classList.remove('on'); }
+function toggleReject(){ document.getElementById('reject-box').classList.toggle('on'); }
+function zoom(u){ document.getElementById('viewer-img').src=u; document.getElementById('viewer').classList.add('on'); }
+async function signed(path, sec){
+  const {data} = await sb.storage.from(C.STORAGE_BUCKET).createSignedUrl(path, sec);
+  return data?.signedUrl || '';
+}
+async function review(status){
+  let reason = null;
+  if(status==='rejected'){
+    reason = document.getElementById('reject-reason').value.trim();
+    if(!reason){ alert('반려 사유를 입력해 주세요. 사용자에게 그대로 표시됩니다.'); return; }
+    if(!confirm('반려하면 사용자가 수정 후 재제출할 수 있습니다.\n반려 안내(전화/문자)는 수작업으로 진행해 주세요.\n\n반려할까요?')) return;
+  } else {
+    if(!confirm('이 제출을 승인할까요?')) return;
+  }
+  const {error} = await sb.from('participants')
+    .update({status, reject_reason: reason, reviewed_at: new Date().toISOString()}).eq('id', CUR.id);
+  if(error){ alert('처리 실패: '+error.message); return; }
+  closeDetail(); await loadAll();
+}
+async function resetPin(){
+  const temp = String(Math.floor(100000+Math.random()*900000));
+  if(!confirm(`임시 핀번호 ${temp} 로 초기화할까요?\n\n이 번호를 참가자에게 전화/문자로 알려주세요.\n참가자는 임시 핀으로 로그인 후 새 핀을 설정하게 됩니다.`)) return;
+  const {data, error} = await sb.rpc('fn_admin_reset_pin', {p_participant_id: CUR.id, p_temp_pin: temp});
+  if(error || data?.error){ alert('초기화 실패. admin_extra.sql 실행 여부를 확인하세요.'); return; }
+  alert(`초기화 완료.\n임시 핀번호: ${temp}\n(창을 닫기 전에 메모하세요)`);
+}
+async function extendDeadline(){
+  const d = prompt('이 참가자의 개별 제출 마감일 (YYYY-MM-DD)\n비우고 확인하면 연장 해제', CUR.deadline_override||'');
+  if(d===null) return;
+  const val = d.trim()===''? null : d.trim();
+  if(val && !/^\d{4}-\d{2}-\d{2}$/.test(val)){ alert('YYYY-MM-DD 형식으로 입력해 주세요.'); return; }
+  const {error} = await sb.from('participants').update({deadline_override: val}).eq('id', CUR.id);
+  if(error){ alert('저장 실패: '+error.message); return; }
+  closeDetail(); await loadAll();
+}
+async function removeParticipant(){
+  if(!confirm(`${CUR.name} (${fmtPhone(CUR.phone)}) 참가자와 모든 증빙을 삭제합니다.\n테스트 계정 정리 용도로만 사용하세요. 되돌릴 수 없습니다.\n\n삭제할까요?`)) return;
+  // 스토리지 파일 먼저 삭제
+  const paths = visitsOf(CUR.id).flatMap(v=>[v.photo1_path,v.photo2_path,v.receipt1_path,v.receipt2_path]).filter(Boolean);
+  if(paths.length) await sb.storage.from(C.STORAGE_BUCKET).remove(paths);
+  const {error} = await sb.from('participants').delete().eq('id', CUR.id);
+  if(error){ alert('삭제 실패: '+error.message); return; }
+  closeDetail(); await loadAll();
+}
+
+// ---------- 내보내기 ----------
+function ymd(d){ const t=new Date(d); return `${t.getFullYear()}${String(t.getMonth()+1).padStart(2,'0')}${String(t.getDate()).padStart(2,'0')}`; }
+async function exportExcel(){
+  const targets = exportTargets();
+  if(!confirm(`${SEL.size?`선택한 ${targets.length}명`:`전체 ${targets.length}명`}의 현황을 엑셀로 내려받습니다. 진행할까요?`)) return;
+  const maxV = Math.max(1, ...targets.map(p=>visitsOf(p.id).length));
+  const rows = [];
+  for(const p of targets){
+    const vs = visitsOf(p.id);
+    const row = {
+      '상태': ST_LABEL[p.status]||p.status, '대표': p.name,
+      '팀인원': teamSize(p), '팀원 명단': (p.team_members||[]).map(m=>`${m.name}(${m.relation})`).join(', '),
+      '소속': p.org, '연락처': fmtPhone(p.phone),
+      '주민증인증': ((p.dtc_proofs||[]).filter(x=>x&&x.path).length)+'/'+teamSize(p),
+      '가입일': new Date(p.created_at).toLocaleDateString('ko-KR'),
+      '제출일시': p.submitted_at? new Date(p.submitted_at).toLocaleString('ko-KR') : '',
+      '반려사유': p.reject_reason||'', '개별마감': p.deadline_override||'',
+    };
+    for(const [qid,label] of SURVEY_COLS) row['설문 '+label] = svVal(p.survey?.[qid]);
+    for(let i=0;i<maxV;i++){
+      const vi = vs[i]; const n = i+1;
+      const picked = vi && !String(vi.merchant_name).startsWith('(업체 미선택');
+      row[`방문지${n} 업체명`] = picked ? vi.merchant_name : '';
+      row[`방문지${n} 분류/지역`] = picked ? `${vi.merchant_category||''}/${vi.merchant_region||''}` : '';
+      row[`방문지${n} 업로드일`] = vi && (vi.photo1_path||vi.receipt1_path) ? new Date(vi.updated_at||vi.created_at).toLocaleDateString('ko-KR') : '';
+      const links = [];
+      if(vi) for(const [f,l] of [['photo1_path','사진1'],['photo2_path','사진2'],['receipt1_path','영수증1'],['receipt2_path','영수증2']])
+        if(vi[f]) links.push(`[${l}] `+ await signed(vi[f], 60*60*24*7));
+      row[`방문지${n} 이미지링크(7일)`] = links.join('\n');
+    }
+    rows.push(row);
+  }
+  const ws = XLSX.utils.json_to_sheet(rows);
+  const cols=[{wch:8},{wch:10},{wch:7},{wch:30},{wch:18},{wch:14},{wch:9},{wch:11},{wch:18},{wch:24},{wch:11}];
+  for(const _ of SURVEY_COLS) cols.push({wch:16});
+  for(let i=0;i<maxV;i++) cols.push({wch:20},{wch:14},{wch:12},{wch:55});
+  ws['!cols']=cols;
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, '참가자');
+  XLSX.writeFile(wb, `밀양인더스트립_제출현황_${ymd(new Date())}${SEL.size?'_선택'+targets.length+'명':''}.xlsx`);
+}
+async function exportZip(){
+  const targets = exportTargets();
+  if(!confirm(`${SEL.size?`선택한 ${targets.length}명`:`전체 ${targets.length}명`}의 이미지를 ZIP으로 내려받습니다. 인원이 많으면 수 분 걸릴 수 있어요. 진행할까요?`)) return;
+  const zip = new JSZip();
+  let n = 0, idx = 0;
+  for(const p of targets){
+    idx++;
+    const folder = `${String(idx).padStart(3,'0')}_${p.name.replace(/[\\/:*?"<>|]/g,'')}`;
+    for(const d of (p.dtc_proofs||[])){
+      if(!d||!d.path) continue;
+      const url = await signed(d.path, 600);
+      try{
+        const blob = await (await fetch(url)).blob();
+        zip.file(`${folder}/주민증인증_${String(d.name).replace(/[\\/:*?"<>|]/g,'')}.jpg`, blob);
+        n++;
+      }catch(e){}
+    }
+    const vs = visitsOf(p.id);
+    for(const [i,vi] of vs.entries()){
+      const picked = !String(vi.merchant_name).startsWith('(업체 미선택');
+      const biz = picked ? '_'+String(vi.merchant_name).replace(/[\\/:*?"<>|]/g,'') : '';
+      const files = [['photo1_path','사진1'],['photo2_path','사진2'],['receipt1_path','영수증1'],['receipt2_path','영수증2']];
+      for(const [f,label] of files){
+        if(!vi[f]) continue;
+        const url = await signed(vi[f], 600);
+        try{
+          const blob = await (await fetch(url)).blob();
+          const date = ymd(vi.updated_at||vi.created_at);
+          zip.file(`${folder}/방문지${i+1}${biz}_${label}_${date}.jpg`, blob);
+          n++;
+        }catch(e){}
+      }
+    }
+  }
+  if(!n){ alert('내려받을 이미지가 없습니다.'); return; }
+  const blob = await zip.generateAsync({type:'blob'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `밀양인더스트립_증빙이미지_${ymd(new Date())}${SEL.size?'_선택'+targets.length+'명':''}.zip`;
+  a.click(); URL.revokeObjectURL(a.href);
+}
+
+// ---------- 유틸 ----------
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+const SURVEY_COLS=[['q1','1.거주지역'],['q2','2.방문인원'],['q3','3.방문목적'],
+['q5','4.방문차수'],['q6','5.주민증 인지'],['q7','6.발급시점'],['q8','7.안내 충분'],['q9','8.기업/근로자'],
+['q10','9.이용 업소유형'],['q11','10.이용 도움'],['q12','11.1인 소비액'],['q13','12.지출항목'],
+['q14','13.추가소비 의향'],['q15','14.전반 만족'],['q16','15.관심 증가'],['q17','16.재방문 의향'],
+['q18','17.추천 의향'],['q19','18.기대효과'],['q20','19.강화 희망'],['q21','20.기타 의견']];
+function svVal(x){ return Array.isArray(x)?x.join('; '):(x??''); }
+function teamSize(p){ return 1 + ((p.team_members&&p.team_members.length)||0); }
+function fmtPhone(p){return String(p||'').replace(/^(\d{3})(\d{3,4})(\d{4})$/,'$1-$2-$3');}
+
+// 세션 유지 시 자동 진입
+(async()=>{ const {data} = await sb.auth.getSession(); if(data.session) enter(); })();
+</script>
+</body>
+</html>
