@@ -737,8 +737,10 @@ window.addEventListener("online", flush);
 
 /* ─────────── 뽑기 ─────────── */
 function stockLocal(){ try{ return JSON.parse(localStorage.getItem("bt_stock")||"null") || CONFIG.PRIZES.map(p=>({...p})); }catch(e){ return CONFIG.PRIZES.map(p=>({...p})); } }
+function norm(p){ if(Array.isArray(p)) p=p[0]; if(typeof p==="string"){ try{ p=JSON.parse(p); }catch(e){ p={id:p}; } } if(!p||typeof p!=="object") return p;
+  const id=p.id||p.prize||p.prize_id; const base=CONFIG.PRIZES.find(x=>x.id===id)||{}; return {id:id||base.id||"gift", name:p.name||p.prize_name||base.name||"보물 경품", emo:p.emo||base.emo||"🎁", at:p.at, tnum:p.tnum}; }
 async function drawPrize(){
-  if(SBON()){ const r=await sb("rpc/bt_draw_prize","POST",{p_tnum:S.tnum}); if(r && r.id) return r; }
+  if(SBON()){ const r=norm(await sb("rpc/bt_draw_prize","POST",{p_tnum:S.tnum})); if(r && r.id && r.id!=="gift") return r; }
   const st=stockLocal(); const pool=st.filter(p=>p.qty>0); if(!pool.length) return null;
   const tot=pool.reduce((a,p)=>a+p.qty,0); let x=Math.random()*tot; let hit=pool[0]; for(const p of pool){ x-=p.qty; if(x<=0){ hit=p; break; } }
   hit.qty--; try{ localStorage.setItem("bt_stock",JSON.stringify(st)); }catch(e){}
@@ -750,16 +752,16 @@ const DRAWN_KEY="bt_drawn_v1";
 function drawnFlag(){ try{ return JSON.parse(localStorage.getItem(DRAWN_KEY)||"null"); }catch(e){ return null; } }
 async function draw(){
   if(drawing || S.prize) return;
-  const df=drawnFlag(); if(df){ toast("이 휴대폰에서는 이미 보물 뽑기를 했어요 (탐험대원 "+df.tnum+")"); S.prize=S.prize||{id:df.id,name:df.name,emo:df.emo||"🎁",at:df.at}; save(); showPrize(); return; }
+  const df=drawnFlag(); if(df){ toast("이 휴대폰에서는 이미 보물 뽑기를 했어요 (탐험대원 "+df.tnum+")"); const n=norm(df); S.prize=norm(S.prize||n); save(); showPrize(); return; }
   drawing=true;
   const m=document.getElementById("machine"), b=document.getElementById("btn-draw"); b.disabled=true; b.textContent="두구두구…";
   m.classList.add("shake","turn"); chime("magic"); try{ navigator.vibrate&&navigator.vibrate([60,40,60,40,120]); }catch(e){}
   const p=await drawPrize();
-  setTimeout(()=>{ m.classList.remove("shake"); const d=document.getElementById("drop"); d.classList.add("go"); b.textContent="캡슐을 눌러 열어요!"; document.getElementById("g-help").textContent="캡슐이 나왔어요! 톡 눌러서 열어 보세요"; S.pending=p?{id:p.id,name:p.name,emo:p.emo}:{id:"none",name:"경품 소진 — 요원에게 문의",emo:"🙏"}; save(); drawing=false; }, 1800);
+  setTimeout(()=>{ m.classList.remove("shake"); const d=document.getElementById("drop"); d.classList.add("go"); b.textContent="캡슐을 눌러 열어요!"; document.getElementById("g-help").textContent="캡슐이 나왔어요! 톡 눌러서 열어 보세요"; S.pending=p?norm(p):{id:"none",name:"경품 소진 — 요원에게 문의",emo:"🙏"}; save(); drawing=false; }, 1800);
 }
 function openCapsule(){ const d=document.getElementById("drop"); if(!d.classList.contains("go") || !S.pending) return; d.classList.add("pop"); chime("wind");
   setTimeout(()=>{ const p=S.pending; S.prize={...p, at:Date.now()}; S.pending=null; save(); try{ localStorage.setItem(DRAWN_KEY, JSON.stringify({...S.prize, tnum:S.tnum})); }catch(e){} showPrize(); }, 500); }
-function showPrize(){ const p=S.prize; if(!p) return; const el=document.getElementById("prize"); const img=`img/prize-${p.id}.webp`;
+function showPrize(){ if(S.prize){ S.prize=norm(S.prize); save(); } const p=S.prize; if(!p) return; const el=document.getElementById("prize"); const img=`img/prize-${p.id}.webp`;
   el.innerHTML=`<img class="pimg" src="${img}" alt="" onerror="this.outerHTML='<div class=emo>${p.emo}</div>'"><h3>${p.name}</h3><p>축하해요! 운영요원에게 이 화면을 보여주고 받아 가세요.</p>`+Array.from({length:24},(_,i)=>`<i class="conf" style="left:${Math.random()*100}%; background:${["#FFC63D","#D9453A","#2A6FD1","#2E8B57","#C39BE8"][i%5]}; animation-delay:${Math.random()*1.5}s; animation-duration:${2+Math.random()*1.5}s"></i>`).join("");
   el.classList.add("show"); document.getElementById("btn-draw").style.display="none"; document.getElementById("g-help").textContent="뽑기 완료!"; document.getElementById("drop").style.display="none";
   const t=document.getElementById("tprz"); t.style.display="block"; t.textContent=`🎁 뽑은 경품: ${p.name}`; renderExtras(); }
